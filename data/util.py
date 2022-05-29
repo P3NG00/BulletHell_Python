@@ -3,7 +3,7 @@ import pygame
 from .constants import FPS
 
 
-def scale_fps(input,):
+def scale_fps(input):
     """scales framerate dependent values"""
     return input / FPS
 

@@ -2,13 +2,15 @@ from pygame import Color
 
 """ constant game values """
 
-SURFACE_SIZE = (800, 600)
+# window properties
+SURFACE_SIZE = (1280, 720)
 TITLE = "Python Game"
 FPS = 65
 
 # a rounded value to use when normalizing a diagonal vector
 VECTOR_DIAG_NORM = 0.71
 
+# game values
 BACKGROUND_COLOR = Color(32, 32, 32)
 FONT_FILE = "data/upheavtt.ttf"
 FONT_SIZE = 24
