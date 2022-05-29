@@ -1,0 +1,7 @@
+__pycache__/
+data/__pycache__/
+.git/
+.vscode/
+*.stats
+assoc_*.bat
+IDEA.txt
