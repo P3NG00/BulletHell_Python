@@ -1,3 +1,4 @@
+import sys
 import pygame as pg
 from data.constants import BACKGROUND_COLOR
 from data.constants import FONT_FILE
@@ -10,7 +11,6 @@ from data.constants import PLAYER_COLOR
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
 from data.game_object import GameObject
-from data.util import end_program
 
 
 # initialize pygame
@@ -25,29 +25,31 @@ surface_pause = pg.Surface(SS)
 surface_pause.fill(PAUSE_OVERLAY_COLOR)
 surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
 surface_pause_text = font.render("Paused", True, PAUSE_FONT_COLOR)
-# create player object
-game_object = GameObject([SS[0] / 2, SS[1] / 2], 16, 250, PLAYER_COLOR)
 # create game clock
 clock = pg.time.Clock()
 # paused state
 pause = False
 # movement variables
 input_h, input_v = 0, 0
+# create player object
+player = GameObject([SS[0] / 2, SS[1] / 2], 16, 300, PLAYER_COLOR)
+# program running variable
+running = True
 
 # loop
-while True:
+while running:
 
     # handle events
     for event in pg.event.get():
         match event.type:
             case pg.QUIT:
                 # actions when window is closed
-                end_program()
+                running = False
             case pg.KEYDOWN:
                 # actions for keydown events
                 match event.key:
                     case pg.K_END:
-                        end_program()
+                        running = False
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         pause = not pause
@@ -81,19 +83,33 @@ while True:
                         input_h += 1
                     case pg.K_d:
                         input_h -= 1
+            case pg.MOUSEBUTTONDOWN:
+                # actions for mouse button down events
+                match event.button:
+                    # left mouse button click
+                    case 1:
+                        # TODO make character shoot a new bullet circle object in direction of mouse cursor
+                        print(1)
 
     # check pause
     if not pause:
         # reset screen
         surface.fill(BACKGROUND_COLOR)
-        # pass input to game object
-        game_object.move(input_h, input_v)
-        print(
-            f"h: {input_h:2} | v: {input_v:2} | x: {game_object.pos[0]:7.2f} | y: {game_object.pos[1]:7.2f}")
+        # update game objects
+        # TODO update ALL registered game objects
+        player.update((input_h, input_v))
         # draw game object
-        game_object.draw(surface)
+        # TODO draw ALL registered game objects
+        player.draw(surface)
+        # print info about the game object
+        print(
+            f"h: {input_h:2} | v: {input_v:2} | x: {player.pos[0]:7.2f} | y: {player.pos[1]:7.2f}")
 
     # display surface
     pg.display.flip()
     # fps lock
     clock.tick(FPS)
+
+# exit code
+pg.quit()
+sys.exit()
