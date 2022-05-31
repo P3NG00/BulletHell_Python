@@ -1,9 +1,8 @@
 import sys
 import pygame as pg
+# TODO implement - pygame.math import Vector2
 from data.constants import BACKGROUND_COLOR
-from data.constants import BULLET_COLOR
 from data.constants import BULLET_RADIUS
-from data.constants import BULLET_SPEED
 from data.constants import DEBUG_FONT_COLOR
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
@@ -11,12 +10,11 @@ from data.constants import FPS
 from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
-from data.constants import PLAYER_COLOR
 from data.constants import PLAYER_RADIUS
-from data.constants import PLAYER_SPEED
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
 from data.game_object import Bullet
+from data.game_object import Enemy
 from data.game_object import Player
 from data.util import normalize
 from data.util import subtract
@@ -45,8 +43,7 @@ surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
 # create player
-player = Player([SS[0] / 2, SS[1] / 2], PLAYER_RADIUS,
-                PLAYER_SPEED, PLAYER_COLOR)
+player = Player([SS[0] / 2, SS[1] / 2])
 # create list of current game objects
 game_objects = []
 # movement input variables
@@ -120,17 +117,24 @@ while running:
                             for i in range(2):
                                 start_pos[i] += start_offset[i]
                             # Create new bullet object
-                            game_objects.append(
-                                Bullet(start_pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, direction))
+                            game_objects.append(Bullet(start_pos, direction))
+                    # right mouse button click
+                    # TODO remove, only for debugging
+                    case 3:
+                        if not pause:
+                            # create new enemy
+                            game_objects.append(Enemy([0, 0]))
 
     # check pause
     if not pause:
+
+        # TODO spawn enemies
         # reset screen
         surface.fill(BACKGROUND_COLOR)
         # update game objects
         player.update(input)
         for go in game_objects:
-            go.update()
+            go.update(player.pos)
         # remove dead game objects
         game_objects = [go for go in game_objects if go.is_alive()]
         # draw game objects
