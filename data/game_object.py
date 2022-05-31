@@ -20,8 +20,8 @@ class GameObject(ABC):
 
     def update(self):
         """moves the game object with its direction"""
-        self.pos[0] += (self.direction[0] * self.speed) / FPS
-        self.pos[1] -= (self.direction[1] * self.speed) / FPS
+        for i in range(2):
+            self.pos[i] += (self.direction[i] * self.speed) / FPS
 
     def draw(self, surface):
         """draws the object to the surface"""

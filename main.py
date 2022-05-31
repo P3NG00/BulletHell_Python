@@ -80,9 +80,9 @@ while running:
                                 (surface_pause_text, (pause_font_left, pause_font_top))])
                     # movement input
                     case pg.K_w:
-                        input[1] += 1
-                    case pg.K_s:
                         input[1] -= 1
+                    case pg.K_s:
+                        input[1] += 1
                     case pg.K_a:
                         input[0] -= 1
                     case pg.K_d:
@@ -92,9 +92,9 @@ while running:
                 match event.key:
                     # movement input
                     case pg.K_w:
-                        input[1] -= 1
-                    case pg.K_s:
                         input[1] += 1
+                    case pg.K_s:
+                        input[1] -= 1
                     case pg.K_a:
                         input[0] += 1
                     case pg.K_d:
@@ -107,12 +107,18 @@ while running:
                         if not pause:
                             # Calculate direction of bullet from player to mouse
                             mouse_pos = pg.mouse.get_pos()
+                            start_pos = player.pos.copy()
                             direction = normalize([
                                 mouse_pos[0] - player.pos[0],
-                                player.pos[1] - mouse_pos[1]])
+                                mouse_pos[1] - player.pos[1]])
+                            # make bullet start in front of player
+                            start_offset = normalize(
+                                direction, PLAYER_RADIUS + BULLET_RADIUS)
+                            for i in range(2):
+                                start_pos[i] += start_offset[i]
                             # Create new bullet object
-                            game_objects.append(Bullet(
-                                player.pos.copy(), BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, direction))
+                            game_objects.append(
+                                Bullet(start_pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, direction))
 
     # check pause
     if not pause:
@@ -134,12 +140,11 @@ while running:
             f"move_y: {input[1]}",
             f"pos_x: {player.pos[0]:.2f}",
             f"pos_y: {player.pos[1]:.2f}",
-            f"objs: {len(game_objects)}",
-        ]
+            f"objs: {len(game_objects)}"]
         # get current screen height
         current_height = SS[1]
         # use each string in the array to create a surface
-        for i in range(0, len(debug_prints)):
+        for i in range(len(debug_prints)):
             # create text surface from string
             debug_surface = create_text_surface(debug_prints[i])
             # move upwards from last height
