@@ -12,11 +12,15 @@ class GameObject(ABC):
     """in-game objects"""
 
     @abstractmethod
-    def __init__(self, pos, radius, speed, color):
+    def __init__(self, pos, radius, speed, color, life=None):
         self.pos = pos
         self.radius = radius
         self.speed = speed
         self.color = color
+        self.life = life
+
+    def is_alive(self):
+        return self.life > 0.0
 
     def update(self):
         """moves the game object with its direction"""
@@ -46,13 +50,9 @@ class Bullet(GameObject):
     """bullet game object"""
 
     def __init__(self, pos, radius, speed, color, direction):
-        super().__init__(pos, radius, speed, color)
-        self._life = float(BULLET_LIFE * MS)
+        super().__init__(pos, radius, speed, color, float(BULLET_LIFE * MS))
         self.direction = direction
 
-    def is_alive(self):
-        return self._life > 0
-
     def update(self):
-        self._life -= MS / FPS
+        self.life -= MS / FPS
         super().update()
