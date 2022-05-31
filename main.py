@@ -4,10 +4,11 @@ from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_COLOR
 from data.constants import BULLET_RADIUS
 from data.constants import BULLET_SPEED
-from data.constants import FONT_COLOR
+from data.constants import DEBUG_FONT_COLOR
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
 from data.constants import FPS
+from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_COLOR
@@ -30,16 +31,16 @@ pg.display.set_caption(TITLE)
 font = pg.font.Font(FONT_FILE, FONT_SIZE)
 
 
-def create_text_surface(text):
-    """returns a surface with text"""
-    return font.render(text, False, FONT_COLOR)
+def create_text_surface(text, color):
+    """returns a surface with colored text"""
+    return font.render(text, False, color)
 
 
 # create pause overlay
 surface_pause = pg.Surface(SS)
 surface_pause.fill(PAUSE_OVERLAY_COLOR)
 surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
-surface_pause_text = create_text_surface("Paused")
+surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
 # create player
@@ -146,7 +147,8 @@ while running:
         # use each string in the array to create a surface
         for i in range(len(debug_prints)):
             # create text surface from string
-            debug_surface = create_text_surface(debug_prints[i])
+            debug_surface = create_text_surface(
+                debug_prints[i], DEBUG_FONT_COLOR)
             # move upwards from last height
             current_height -= debug_surface.get_height()
             # replace index with blit information
