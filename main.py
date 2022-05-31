@@ -4,10 +4,10 @@ from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_COLOR
 from data.constants import BULLET_RADIUS
 from data.constants import BULLET_SPEED
+from data.constants import FONT_COLOR
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
 from data.constants import FPS
-from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_COLOR
@@ -28,11 +28,18 @@ surface = pg.display.set_mode(SS)
 pg.display.set_caption(TITLE)
 # create font
 font = pg.font.Font(FONT_FILE, FONT_SIZE)
+
+
+def create_text_surface(text):
+    """returns a surface with text"""
+    return font.render(text, False, FONT_COLOR)
+
+
 # create pause overlay
 surface_pause = pg.Surface(SS)
 surface_pause.fill(PAUSE_OVERLAY_COLOR)
 surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
-surface_pause_text = font.render("Paused", True, PAUSE_FONT_COLOR)
+surface_pause_text = create_text_surface("Paused")
 # create game clock
 clock = pg.time.Clock()
 # create player
@@ -121,10 +128,26 @@ while running:
         player.draw(surface)
         for go in game_objects:
             go.draw(surface)
-        # TODO update below on screen instead of in console
-        # print info
-        print(
-            f"move: {input[0]:2}, {input[1]:2} | pos: {player.pos[0]:7.2f}, {player.pos[1]:7.2f} | objs: {len(game_objects)}")
+        # display info on screen
+        debug_prints = [
+            f"move_x: {input[0]}",
+            f"move_y: {input[1]}",
+            f"pos_x: {player.pos[0]:.2f}",
+            f"pos_y: {player.pos[1]:.2f}",
+            f"objs: {len(game_objects)}",
+        ]
+        # get current screen height
+        current_height = SS[1]
+        # use each string in the array to create a surface
+        for i in range(0, len(debug_prints)):
+            # create text surface from string
+            debug_surface = create_text_surface(debug_prints[i])
+            # move upwards from last height
+            current_height -= debug_surface.get_height()
+            # replace index with blit information
+            debug_prints[i] = (debug_surface, (2, current_height))
+        # blit surfaces
+        surface.blits(debug_prints)
 
     # display surface
     pg.display.flip()
