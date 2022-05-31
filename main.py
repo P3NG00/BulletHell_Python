@@ -11,12 +11,11 @@ from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_COLOR
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
-from data.game_object import GameObject
+from data.game_object import Bullet
 from data.game_object import Player
 from data.util import normalize
 
 """main game script"""
-
 
 # initialize pygame
 pg.init()
@@ -100,7 +99,7 @@ while running:
                                 mouse_pos[0] - player.pos[0],
                                 player.pos[1] - mouse_pos[1]])
                             # Create new bullet object
-                            game_objects.append(GameObject(
+                            game_objects.append(Bullet(
                                 player.pos.copy(), 4, 450, BULLET_COLOR, direction))
 
     # check pause
@@ -119,7 +118,7 @@ while running:
             go.draw(surface)
         # print info
         print(
-            f"objs: {len(game_objects):2} | move: {input[0]:2}, {input[1]:2} | pos: {player.pos[0]:7.2f}, {player.pos[1]:7.2f}")
+            f"move: {input[0]:2}, {input[1]:2} | pos: {player.pos[0]:7.2f}, {player.pos[1]:7.2f} | objs: {len(game_objects)}")
 
     # display surface
     pg.display.flip()
