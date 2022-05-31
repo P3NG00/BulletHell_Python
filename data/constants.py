@@ -7,11 +7,10 @@ SURFACE_SIZE = (1280, 720)
 TITLE = "Python Game"
 FPS = 65
 
-# a rounded value to use when normalizing a diagonal vector
-VECTOR_DIAG_NORM = 0.71
-
 # game values
 BACKGROUND_COLOR = Color(32, 32, 32)
+BULLET_COLOR = Color(255, 0, 0)
+BULLET_LIFE = 1  # in seconds
 FONT_FILE = "data/upheavtt.ttf"
 FONT_SIZE = 24
 PAUSE_FONT_COLOR = Color(255, 255, 255)

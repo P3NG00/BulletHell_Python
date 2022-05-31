@@ -1,6 +1,7 @@
 import sys
 import pygame as pg
 from data.constants import BACKGROUND_COLOR
+from data.constants import BULLET_COLOR
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
 from data.constants import FPS
@@ -11,6 +12,10 @@ from data.constants import PLAYER_COLOR
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
 from data.game_object import GameObject
+from data.game_object import Player
+from data.util import normalize
+
+"""main game script"""
 
 
 # initialize pygame
@@ -27,14 +32,14 @@ surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
 surface_pause_text = font.render("Paused", True, PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
-# paused state
-pause = False
-# movement variables
-input_h, input_v = 0, 0
-# create player object
-player = GameObject([SS[0] / 2, SS[1] / 2], 16, 300, PLAYER_COLOR)
-# program running variable
-running = True
+# create player
+player = Player([SS[0] / 2, SS[1] / 2], 16, 200, PLAYER_COLOR)
+# create list of current game objects
+game_objects = []
+# movement input variables
+input = [0, 0]
+# program running and pause states
+running, pause = True, False
 
 # loop
 while running:
@@ -64,46 +69,57 @@ while running:
                                 (surface_pause_text, (pause_font_left, pause_font_top))])
                     # movement input
                     case pg.K_w:
-                        input_v += 1
+                        input[1] += 1
                     case pg.K_s:
-                        input_v -= 1
+                        input[1] -= 1
                     case pg.K_a:
-                        input_h -= 1
+                        input[0] -= 1
                     case pg.K_d:
-                        input_h += 1
+                        input[0] += 1
             case pg.KEYUP:
                 # actions for keyup events
                 match event.key:
                     # movement input
                     case pg.K_w:
-                        input_v -= 1
+                        input[1] -= 1
                     case pg.K_s:
-                        input_v += 1
+                        input[1] += 1
                     case pg.K_a:
-                        input_h += 1
+                        input[0] += 1
                     case pg.K_d:
-                        input_h -= 1
+                        input[0] -= 1
             case pg.MOUSEBUTTONDOWN:
                 # actions for mouse button down events
                 match event.button:
                     # left mouse button click
                     case 1:
-                        # TODO make character shoot a new bullet circle object in direction of mouse cursor
-                        print(1)
+                        if not pause:
+                            # Calculate direction of bullet from player to mouse
+                            mouse_pos = pg.mouse.get_pos()
+                            direction = normalize([
+                                mouse_pos[0] - player.pos[0],
+                                player.pos[1] - mouse_pos[1]])
+                            # Create new bullet object
+                            game_objects.append(GameObject(
+                                player.pos.copy(), 4, 450, BULLET_COLOR, direction))
 
     # check pause
     if not pause:
         # reset screen
         surface.fill(BACKGROUND_COLOR)
         # update game objects
-        # TODO update ALL registered game objects
-        player.update((input_h, input_v))
-        # draw game object
-        # TODO draw ALL registered game objects
+        player.update(input)
+        for go in game_objects:
+            go.update()
+        # remove dead game objects
+        game_objects = [go for go in game_objects if go.is_alive()]
+        # draw game objects
         player.draw(surface)
-        # print info about the game object
+        for go in game_objects:
+            go.draw(surface)
+        # print info
         print(
-            f"h: {input_h:2} | v: {input_v:2} | x: {player.pos[0]:7.2f} | y: {player.pos[1]:7.2f}")
+            f"objs: {len(game_objects):2} | move: {input[0]:2}, {input[1]:2} | pos: {player.pos[0]:7.2f}, {player.pos[1]:7.2f}")
 
     # display surface
     pg.display.flip()
