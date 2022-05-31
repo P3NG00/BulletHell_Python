@@ -3,6 +3,7 @@ from abc import ABC
 from abc import abstractmethod
 from .constants import BULLET_LIFE
 from .constants import FPS
+from .constants import MILLISEC_IN_SEC as MS
 from .util import normalize
 
 
@@ -46,12 +47,12 @@ class Bullet(GameObject):
 
     def __init__(self, pos, radius, speed, color, direction):
         super().__init__(pos, radius, speed, color)
-        self._life = float(BULLET_LIFE * 1000)
+        self._life = float(BULLET_LIFE * MS)
         self.direction = direction
 
     def is_alive(self):
         return self._life > 0
 
     def update(self):
-        self._life -= 1000 / FPS
+        self._life -= MS / FPS
         super().update()

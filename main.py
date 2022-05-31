@@ -2,6 +2,8 @@ import sys
 import pygame as pg
 from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_COLOR
+from data.constants import BULLET_RADIUS
+from data.constants import BULLET_SPEED
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
 from data.constants import FPS
@@ -9,6 +11,8 @@ from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_COLOR
+from data.constants import PLAYER_RADIUS
+from data.constants import PLAYER_SPEED
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
 from data.game_object import Bullet
@@ -32,7 +36,8 @@ surface_pause_text = font.render("Paused", True, PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
 # create player
-player = Player([SS[0] / 2, SS[1] / 2], 16, 200, PLAYER_COLOR)
+player = Player([SS[0] / 2, SS[1] / 2], PLAYER_RADIUS,
+                PLAYER_SPEED, PLAYER_COLOR)
 # create list of current game objects
 game_objects = []
 # movement input variables
@@ -100,7 +105,7 @@ while running:
                                 player.pos[1] - mouse_pos[1]])
                             # Create new bullet object
                             game_objects.append(Bullet(
-                                player.pos.copy(), 4, 450, BULLET_COLOR, direction))
+                                player.pos.copy(), BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, direction))
 
     # check pause
     if not pause:
@@ -116,6 +121,7 @@ while running:
         player.draw(surface)
         for go in game_objects:
             go.draw(surface)
+        # TODO update below on screen instead of in console
         # print info
         print(
             f"move: {input[0]:2}, {input[1]:2} | pos: {player.pos[0]:7.2f}, {player.pos[1]:7.2f} | objs: {len(game_objects)}")
