@@ -19,6 +19,7 @@ from data.constants import TITLE
 from data.game_object import Bullet
 from data.game_object import Player
 from data.util import normalize
+from data.util import subtract
 
 """main game script"""
 
@@ -67,6 +68,8 @@ while running:
                 match event.key:
                     case pg.K_END:
                         running = False
+                    case pg.K_PAGEDOWN:
+                        pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         pause = not pause
@@ -109,9 +112,8 @@ while running:
                             # Calculate direction of bullet from player to mouse
                             mouse_pos = pg.mouse.get_pos()
                             start_pos = player.pos.copy()
-                            direction = normalize([
-                                mouse_pos[0] - player.pos[0],
-                                mouse_pos[1] - player.pos[1]])
+                            direction = normalize(
+                                subtract(mouse_pos, start_pos))
                             # make bullet start in front of player
                             start_offset = normalize(
                                 direction, PLAYER_RADIUS + BULLET_RADIUS)

@@ -24,3 +24,8 @@ def normalize(vector, scaled_magnitude=1.0):
     for i in range(2):
         new_vector[i] *= scaled_magnitude / magnitude
     return new_vector
+
+
+def subtract(vector_1, vector_2):
+    """returns the difference between two vectors"""
+    return [vector_1[i] - vector_2[i] for i in range(2)]
