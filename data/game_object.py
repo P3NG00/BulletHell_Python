@@ -71,7 +71,6 @@ class Bullet(GameObject):
                          BULLET_COLOR, float(BULLET_LIFE * MS))
         self.direction = direction
 
-    # the 'extra_info' is kept so that one 'update' method exists with same parameters
     def update(self):
         self.life -= MS / FPS
         super().update()

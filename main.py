@@ -3,9 +3,9 @@ import pygame as pg
 from pygame.math import Vector2
 from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_RADIUS
-from data.constants import DEBUG_FONT_COLOR
+from data.constants import UI_FONT_COLOR
 from data.constants import FONT_FILE
-from data.constants import FONT_SIZE
+from data.constants import FONT_SIZES
 from data.constants import FPS
 from data.constants import GAME_OVER_FONT_COLOR
 from data.constants import PAUSE_FONT_COLOR
@@ -13,20 +13,39 @@ from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
-from data.constants import SURFACE_SIZE as SS
+from data.constants import SURFACE_SIZE
 from data.constants import TITLE
+from data.constants import UI_BORDER_OFFSET
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
 
 """main game script"""
 
+
+def create_text_surface(text, color, size_index=0):
+    """returns a surface with colored text"""
+    return font[size_index].render(text, False, color)
+
+
+def reset_game():
+    """resets game data"""
+    global obj
+    obj = {
+        "player": Player(SURFACE_SIZE / 2),
+        "bullets": [],
+        "enemies": []}
+    global stats
+    stats = {
+        "bullets": 10,
+        "killed": 0}
+
+
 # initialize pygame
 pg.init()
 pg.display.set_caption(TITLE)
-# create font
-# TODO create method to easily create different sized fonts
-font = pg.font.Font(FONT_FILE, FONT_SIZE)
+# create fonts
+font = [pg.font.Font(FONT_FILE, font_size) for font_size in FONT_SIZES]
 # program info
 clock = pg.time.Clock()
 input = Vector2(0)
@@ -36,34 +55,14 @@ program = {
 # game data
 obj = None
 stats = None
-
-
-def create_text_surface(text, color):
-    """returns a surface with colored text"""
-    return font.render(text, False, color)
-
-
-def reset_game():
-    """resets game data"""
-    global obj
-    obj = {
-        "player": Player(SS / 2),
-        "bullets": [],
-        "enemies": []}
-    global stats
-    stats = {
-        "bullets": 10,
-        "killed": 0}
-
-
 # create surfaces
 surface = {
-    "main": pg.display.set_mode(SS),
-    "fade": pg.Surface(SS),
+    "main": pg.display.set_mode(SURFACE_SIZE),
+    "fade": pg.Surface(SURFACE_SIZE),
     "text": {
         "pause": create_text_surface("Paused", PAUSE_FONT_COLOR),
-        "game_over": create_text_surface("GAME OVER", GAME_OVER_FONT_COLOR),
-        "restart": create_text_surface("Press SPACE to restart", RESTART_FONT_COLOR)}}
+        "game_over": create_text_surface("GAME OVER", GAME_OVER_FONT_COLOR, 1),
+        "restart": create_text_surface("PreSURFACE_SIZE SPACE to restart", RESTART_FONT_COLOR)}}
 surface["fade"].fill(PAUSE_OVERLAY_COLOR)
 surface["fade"].set_alpha(PAUSE_OVERLAY_ALPHA)
 # reset game
@@ -94,7 +93,7 @@ while program["running"]:
                                 # draw pausing overlay
                                 surface["main"].blits([
                                     (surface["fade"], (0, 0)),
-                                    (surface["text"]["pause"], ((SS - surface["text"]["pause"].get_size()) / 2))])
+                                    (surface["text"]["pause"], ((SURFACE_SIZE - surface["text"]["pause"].get_size()) / 2))])
                      # restart game button
                     case pg.K_SPACE:
                         if not obj["player"].is_alive():
@@ -176,26 +175,24 @@ while program["running"]:
         for obj_str in ["enemies", "bullets"]:
             for go in obj[obj_str]:
                 go.draw(surface["main"])
-        # update ui info
+        # display appropriate ui
         if obj["player"].is_alive():
-            ui = [
-                f"killed: {stats['killed']}",
-                f"bullets: {stats['bullets']}",
-                f"life: {obj['player'].life}"]
-            current_height = SS.y
+            ui = [f"{stat}: {stats[stat]}" for stat in ["bullets", "killed"]]
+            ui.append(f"life: {obj['player'].life}")
+            current_height = SURFACE_SIZE.y - UI_BORDER_OFFSET
             for i in range(len(ui)):
                 # create text surface from string
-                debug_surface = create_text_surface(ui[i], DEBUG_FONT_COLOR)
+                debug_surface = create_text_surface(ui[i], UI_FONT_COLOR)
                 # move upwards from last height
                 current_height -= debug_surface.get_height()
                 # replace index with blit information
-                ui[i] = (debug_surface, (2, current_height))
+                ui[i] = (debug_surface, (UI_BORDER_OFFSET + 5, current_height))
             # blit surfaces
             surface["main"].blits(ui)
-        # if player is dead, blit game over screen
-        if obj["player"].life <= 0:
+        else:
+            # blit game over screen
             surface["main"].blit(surface["fade"], (0, 0))
-            center = SS / 2
+            center = SURFACE_SIZE / 2
             surface["main"].blit(surface["text"]["game_over"],
                                  (center - (Vector2(surface["text"]["game_over"].get_size()) / 2)))
             center.y += surface["text"]["game_over"].get_height()
@@ -206,7 +203,8 @@ while program["running"]:
     pg.display.flip()
     # fps lock
     clock.tick(FPS)
+    # end of game loop
 
-# exit code
+# end of program
 pg.quit()
 sys.exit()
