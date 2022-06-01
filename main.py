@@ -40,36 +40,42 @@ surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
 surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
-# create player
-player = Player(SS / 2)
-# lists for game objects
-list_enemies = []
-list_bullets = []
+# game objects
+obj = {
+    "player": Player(SS / 2),
+    "bullets": [],
+    "enemies": []}
 # movement input variables
 input = Vector2(0)
-# program running and pause states
-running, pause = True, False
+# stats
+stats = {
+    "bullets": 10,
+    "killed": 0}
+# program states
+program = {
+    "running": True,
+    "pause": False}
 
 # loop
-while running:
+while program["running"]:
 
     # handle events
     for event in pg.event.get():
         match event.type:
             case pg.QUIT:
                 # actions when window is closed
-                running = False
+                program["running"] = False
             case pg.KEYDOWN:
                 # actions for keydown events
                 match event.key:
                     case pg.K_END:
-                        running = False
+                        program["running"] = False
                     case pg.K_PAGEDOWN:
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
-                        pause = not pause
-                        if pause:
+                        program["pause"] = not program["pause"]
+                        if program["pause"]:
                             # draw pausing overlay
                             surface.blits([
                                 (surface_pause, (0, 0)),
@@ -102,69 +108,71 @@ while running:
                 match event.button:
                     # left mouse button click
                     case 1:
-                        if not pause:
+                        if not program["pause"] and stats["bullets"] > 0:
                             # Calculate direction of bullet from player to mouse
                             mouse_pos = pg.mouse.get_pos()
-                            start_pos = player.pos.copy()
+                            start_pos = obj["player"].pos.copy()
                             direction = (mouse_pos - start_pos).normalize()
                             # make bullet start in front of player
                             start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
                             start_pos += start_offset
                             # Create new bullet object
-                            list_bullets.append(Bullet(start_pos, direction))
+                            obj["bullets"].append(
+                                Bullet(start_pos, direction))
+                            stats["bullets"] -= 1
                     # right mouse button click
                     # TODO remove, only for debugging
                     case 3:
-                        if not pause:
+                        if not program["pause"]:
                             # create new enemy
-                            list_enemies.append(
+                            obj["enemies"].append(
                                 Enemy(Vector2(pg.mouse.get_pos())))
 
     # check pause
-    if not pause:
+    if not program["pause"]:
 
         # TODO spawn enemies naturally
         # reset screen
         surface.fill(BACKGROUND_COLOR)
         # update game objects
-        player.update(input)
-        for enemy in list_enemies:
-            enemy.update(player.pos)
-        for bullet in list_bullets:
+        obj["player"].update(input)
+        for enemy in obj["enemies"]:
+            enemy.update(obj["player"])
+        for bullet in obj["bullets"]:
             bullet.update()
             # check bullet collision
-            for enemy in list_enemies:
+            for enemy in obj["enemies"]:
+                # if bullet hits enemy
                 if bullet.is_touching(enemy):
                     bullet.life = 0
                     enemy.life -= 1
+                    # increment bullet and kill count
+                    for stat in ["bullets", "killed"]:
+                        stats[stat] += 1
         # remove dead game objects
-        list_enemies = [enemy for enemy in list_enemies if enemy.is_alive()]
-        list_bullets = [bullet for bullet in list_bullets if bullet.is_alive()]
+        for obj_str in ["enemies", "bullets"]:
+            obj[obj_str] = [go for go in obj[obj_str] if go.is_alive()]
         # draw game objects
-        player.draw(surface)
-        for enemy in list_enemies:
-            enemy.draw(surface)
-        for bullet in list_bullets:
-            bullet.draw(surface)
-        # update debug info
-        debug_prints = [
-            f"move_x: {input.x:.0f}",
-            f"move_y: {input.y:.0f}",
-            f"pos_x: {player.pos.x:.2f}",
-            f"pos_y: {player.pos.y:.2f}",
-            f"bullets: {len(list_bullets)}",
-            f"enemies: {len(list_enemies)}"]
+        obj["player"].draw(surface)
+        for obj_str in ["enemies", "bullets"]:
+            for go in obj[obj_str]:
+                go.draw(surface)
+        # update ui info
+        ui = [
+            f"killed: {stats['killed']}",
+            f"bullets: {stats['bullets']}",
+            f"life: {obj['player'].life}"]
         current_height = SS.y
-        for i in range(len(debug_prints)):
+        # replace ui strings with its blit info
+        for i in range(len(ui)):
             # create text surface from string
-            debug_surface = create_text_surface(
-                debug_prints[i], DEBUG_FONT_COLOR)
+            debug_surface = create_text_surface(ui[i], DEBUG_FONT_COLOR)
             # move upwards from last height
             current_height -= debug_surface.get_height()
             # replace index with blit information
-            debug_prints[i] = (debug_surface, Vector2(2, current_height))
+            ui[i] = (debug_surface, (2, current_height))
         # blit surfaces
-        surface.blits(debug_prints)
+        surface.blits(ui)
 
     # display surface
     pg.display.flip()

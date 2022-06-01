@@ -13,6 +13,7 @@ from .constants import ENEMY_SPEED
 from .constants import FPS
 from .constants import MILLISEC_IN_SEC as MS
 from .constants import PLAYER_COLOR
+from .constants import PLAYER_LIFE
 from .constants import PLAYER_RADIUS
 from .constants import PLAYER_SPEED
 
@@ -50,7 +51,7 @@ class Player(GameObject):
     """player game object"""
 
     def __init__(self, pos):
-        super().__init__(pos, PLAYER_RADIUS, PLAYER_SPEED, PLAYER_COLOR)
+        super().__init__(pos, PLAYER_RADIUS, PLAYER_SPEED, PLAYER_COLOR, PLAYER_LIFE)
 
     def update(self, input):
         """used to handle movement input"""
@@ -82,8 +83,12 @@ class Enemy(GameObject):
     def __init__(self, pos):
         super().__init__(pos, ENEMY_RADIUS, ENEMY_SPEED, ENEMY_COLOR, ENEMY_LIFE)
 
-    def update(self, player_pos):
+    def update(self, player):
         """moves the enemy towards the player"""
         # move towards player position
-        self.direction = (player_pos - self.pos).normalize()
+        self.direction = (player.pos - self.pos).normalize()
+        # check player collision
+        if self.is_touching(player):
+            self.life = 0
+            player.life -= 1
         super().update()
