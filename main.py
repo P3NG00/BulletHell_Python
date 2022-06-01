@@ -1,6 +1,6 @@
 import sys
 import pygame as pg
-# TODO implement - pygame.math import Vector2
+from pygame.math import Vector2
 from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_RADIUS
 from data.constants import DEBUG_FONT_COLOR
@@ -16,8 +16,6 @@ from data.constants import TITLE
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
-from data.util import normalize
-from data.util import subtract
 
 """main game script"""
 
@@ -43,11 +41,11 @@ surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
 # create game clock
 clock = pg.time.Clock()
 # create player
-player = Player([SS[0] / 2, SS[1] / 2])
+player = Player(SS / 2)
 # create list of current game objects
 game_objects = []
 # movement input variables
-input = [0, 0]
+input = Vector2(0)
 # program running and pause states
 running, pause = True, False
 
@@ -72,34 +70,32 @@ while running:
                         pause = not pause
                         if pause:
                             # draw pausing overlay
-                            pause_font_left = (
-                                SS[0] / 2) - (surface_pause_text.get_width() / 2)
-                            pause_font_top = (
-                                SS[1] / 2) - (surface_pause_text.get_height() / 2)
                             surface.blits([
                                 (surface_pause, (0, 0)),
-                                (surface_pause_text, (pause_font_left, pause_font_top))])
+                                (surface_pause_text, ((
+                                    SS.x / 2) - (surface_pause_text.get_width() / 2), (
+                                    SS.y / 2) - (surface_pause_text.get_height() / 2)))])
                     # movement input
                     case pg.K_w:
-                        input[1] -= 1
+                        input.y -= 1
                     case pg.K_s:
-                        input[1] += 1
+                        input.y += 1
                     case pg.K_a:
-                        input[0] -= 1
+                        input.x -= 1
                     case pg.K_d:
-                        input[0] += 1
+                        input.x += 1
             case pg.KEYUP:
                 # actions for keyup events
                 match event.key:
                     # movement input
                     case pg.K_w:
-                        input[1] += 1
+                        input.y += 1
                     case pg.K_s:
-                        input[1] -= 1
+                        input.y -= 1
                     case pg.K_a:
-                        input[0] += 1
+                        input.x += 1
                     case pg.K_d:
-                        input[0] -= 1
+                        input.x -= 1
             case pg.MOUSEBUTTONDOWN:
                 # actions for mouse button down events
                 match event.button:
@@ -109,13 +105,10 @@ while running:
                             # Calculate direction of bullet from player to mouse
                             mouse_pos = pg.mouse.get_pos()
                             start_pos = player.pos.copy()
-                            direction = normalize(
-                                subtract(mouse_pos, start_pos))
+                            direction = (mouse_pos - start_pos).normalize()
                             # make bullet start in front of player
-                            start_offset = normalize(
-                                direction, PLAYER_RADIUS + BULLET_RADIUS)
-                            for i in range(2):
-                                start_pos[i] += start_offset[i]
+                            start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
+                            start_pos += start_offset
                             # Create new bullet object
                             game_objects.append(Bullet(start_pos, direction))
                     # right mouse button click
@@ -123,7 +116,7 @@ while running:
                     case 3:
                         if not pause:
                             # create new enemy
-                            game_objects.append(Enemy([0, 0]))
+                            game_objects.append(Enemy(Vector2(0, 0)))
 
     # check pause
     if not pause:
@@ -133,23 +126,21 @@ while running:
         surface.fill(BACKGROUND_COLOR)
         # update game objects
         player.update(input)
+        player.draw(surface)
         for go in game_objects:
             go.update(player.pos)
+            go.draw(surface)
         # remove dead game objects
         game_objects = [go for go in game_objects if go.is_alive()]
         # draw game objects
-        player.draw(surface)
-        for go in game_objects:
-            go.draw(surface)
-        # display info on screen
         debug_prints = [
-            f"move_x: {input[0]}",
-            f"move_y: {input[1]}",
-            f"pos_x: {player.pos[0]:.2f}",
-            f"pos_y: {player.pos[1]:.2f}",
+            f"move_x: {input.x}",
+            f"move_y: {input.y}",
+            f"pos_x: {player.pos.x:.2f}",
+            f"pos_y: {player.pos.y:.2f}",
             f"objs: {len(game_objects)}"]
         # get current screen height
-        current_height = SS[1]
+        current_height = SS.y
         # use each string in the array to create a surface
         for i in range(len(debug_prints)):
             # create text surface from string
@@ -158,7 +149,7 @@ while running:
             # move upwards from last height
             current_height -= debug_surface.get_height()
             # replace index with blit information
-            debug_prints[i] = (debug_surface, (2, current_height))
+            debug_prints[i] = (debug_surface, Vector2(2, current_height))
         # blit surfaces
         surface.blits(debug_prints)
 

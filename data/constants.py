@@ -1,9 +1,10 @@
 from pygame import Color
+from pygame import Vector2
 
 """ constant game values """
 
 # window properties
-SURFACE_SIZE = (1280, 720)
+SURFACE_SIZE = Vector2(1280, 720)
 TITLE = "Python Game"
 FPS = 65.0
 

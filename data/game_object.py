@@ -14,8 +14,6 @@ from .constants import MILLISEC_IN_SEC as MS
 from .constants import PLAYER_COLOR
 from .constants import PLAYER_RADIUS
 from .constants import PLAYER_SPEED
-from .util import normalize
-from .util import subtract
 
 
 # abstract class
@@ -24,7 +22,7 @@ class GameObject(ABC):
 
     @abstractmethod
     def __init__(self, pos, radius, speed, color, life=None):
-        self.pos = pos
+        self.pos = pos.copy()
         self.radius = radius
         self.speed = speed
         self.color = color
@@ -36,8 +34,7 @@ class GameObject(ABC):
     @abstractmethod
     def update(self, extra_info=None):
         """moves the game object with its direction"""
-        for i in range(2):
-            self.pos[i] += (self.direction[i] * self.speed) / FPS
+        self.pos += (self.direction * self.speed) / FPS
 
     def draw(self, surface):
         """draws the object to the surface"""
@@ -55,7 +52,9 @@ class Player(GameObject):
     def update(self, input):
         """used to handle movement input"""
         # normalize input vector
-        self.direction = normalize(input)
+        self.direction = input
+        if self.direction.magnitude() not in [0.0, 1.0]:
+            self.direction = self.direction.normalize()
         # update movement this frame
         super().update()
 
@@ -83,6 +82,6 @@ class Enemy(GameObject):
     def update(self, player_pos):
         """moves the enemy towards the player"""
         # move towards player position
-        self.direction = normalize(subtract(player_pos, self.pos))
+        self.direction = (player_pos - self.pos).normalize()
         # TODO check if collided with bullet and lose health
         super().update()
