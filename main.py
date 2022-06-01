@@ -42,8 +42,9 @@ surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
 clock = pg.time.Clock()
 # create player
 player = Player(SS / 2)
-# create list of current game objects
-game_objects = []
+# lists for game objects
+list_enemies = []
+list_bullets = []
 # movement input variables
 input = Vector2(0)
 # program running and pause states
@@ -110,38 +111,50 @@ while running:
                             start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
                             start_pos += start_offset
                             # Create new bullet object
-                            game_objects.append(Bullet(start_pos, direction))
+                            list_bullets.append(Bullet(start_pos, direction))
                     # right mouse button click
                     # TODO remove, only for debugging
                     case 3:
                         if not pause:
                             # create new enemy
-                            game_objects.append(Enemy(Vector2(0, 0)))
+                            list_enemies.append(
+                                Enemy(Vector2(pg.mouse.get_pos())))
 
     # check pause
     if not pause:
 
-        # TODO spawn enemies
+        # TODO spawn enemies naturally
         # reset screen
         surface.fill(BACKGROUND_COLOR)
         # update game objects
         player.update(input)
-        player.draw(surface)
-        for go in game_objects:
-            go.update(player.pos)
-            go.draw(surface)
+        for enemy in list_enemies:
+            enemy.update(player.pos)
+        for bullet in list_bullets:
+            bullet.update()
+            # check bullet collision
+            for enemy in list_enemies:
+                if bullet.is_touching(enemy):
+                    bullet.life = 0
+                    enemy.life -= 1
         # remove dead game objects
-        game_objects = [go for go in game_objects if go.is_alive()]
+        list_enemies = [enemy for enemy in list_enemies if enemy.is_alive()]
+        list_bullets = [bullet for bullet in list_bullets if bullet.is_alive()]
         # draw game objects
+        player.draw(surface)
+        for enemy in list_enemies:
+            enemy.draw(surface)
+        for bullet in list_bullets:
+            bullet.draw(surface)
+        # update debug info
         debug_prints = [
-            f"move_x: {input.x}",
-            f"move_y: {input.y}",
+            f"move_x: {input.x:.0f}",
+            f"move_y: {input.y:.0f}",
             f"pos_x: {player.pos.x:.2f}",
             f"pos_y: {player.pos.y:.2f}",
-            f"objs: {len(game_objects)}"]
-        # get current screen height
+            f"bullets: {len(list_bullets)}",
+            f"enemies: {len(list_enemies)}"]
         current_height = SS.y
-        # use each string in the array to create a surface
         for i in range(len(debug_prints)):
             # create text surface from string
             debug_surface = create_text_surface(

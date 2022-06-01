@@ -1,4 +1,5 @@
 import pygame as pg
+from pygame.math import Vector2
 from abc import ABC
 from abc import abstractmethod
 from .constants import BULLET_COLOR
@@ -27,12 +28,13 @@ class GameObject(ABC):
         self.speed = speed
         self.color = color
         self.life = life
+        self.direction = Vector2(0)
 
     def is_alive(self):
+        """returns if the game object has life remaining"""
         return self.life > 0.0
 
-    @abstractmethod
-    def update(self, extra_info=None):
+    def update(self):
         """moves the game object with its direction"""
         self.pos += (self.direction * self.speed) / FPS
 
@@ -40,7 +42,8 @@ class GameObject(ABC):
         """draws the object to the surface"""
         pg.draw.circle(surface, self.color, self.pos, self.radius)
 
-    # TODO create method to check if object is touching another object
+    def is_touching(self, other):
+        return (self.pos - other.pos).magnitude() < self.radius + other.radius
 
 
 class Player(GameObject):
@@ -68,7 +71,7 @@ class Bullet(GameObject):
         self.direction = direction
 
     # the 'extra_info' is kept so that one 'update' method exists with same parameters
-    def update(self, extra_info=None):
+    def update(self):
         self.life -= MS / FPS
         super().update()
 
@@ -83,5 +86,4 @@ class Enemy(GameObject):
         """moves the enemy towards the player"""
         # move towards player position
         self.direction = (player_pos - self.pos).normalize()
-        # TODO check if collided with bullet and lose health
         super().update()
