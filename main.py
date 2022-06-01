@@ -62,7 +62,7 @@ surface = {
     "text": {
         "pause": create_text_surface("Paused", PAUSE_FONT_COLOR),
         "game_over": create_text_surface("GAME OVER", GAME_OVER_FONT_COLOR, 1),
-        "restart": create_text_surface("PreSURFACE_SIZE SPACE to restart", RESTART_FONT_COLOR)}}
+        "restart": create_text_surface("Press SPACE to restart...", RESTART_FONT_COLOR)}}
 surface["fade"].fill(PAUSE_OVERLAY_COLOR)
 surface["fade"].set_alpha(PAUSE_OVERLAY_ALPHA)
 # reset game
