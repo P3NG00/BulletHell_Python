@@ -7,10 +7,12 @@ from data.constants import DEBUG_FONT_COLOR
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZE
 from data.constants import FPS
+from data.constants import GAME_OVER_FONT_COLOR
 from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
+from data.constants import RESTART_FONT_COLOR
 from data.constants import SURFACE_SIZE as SS
 from data.constants import TITLE
 from data.game_object import Bullet
@@ -21,11 +23,15 @@ from data.game_object import Player
 
 # initialize pygame
 pg.init()
-# create main window with title
-surface = pg.display.set_mode(SS)
 pg.display.set_caption(TITLE)
 # create font
 font = pg.font.Font(FONT_FILE, FONT_SIZE)
+# create game clock
+clock = pg.time.Clock()
+# game data
+obj = None
+stats = None
+input = None
 
 
 def create_text_surface(text, color):
@@ -33,28 +39,40 @@ def create_text_surface(text, color):
     return font.render(text, False, color)
 
 
-# create pause overlay
-surface_pause = pg.Surface(SS)
-surface_pause.fill(PAUSE_OVERLAY_COLOR)
-surface_pause.set_alpha(PAUSE_OVERLAY_ALPHA)
-surface_pause_text = create_text_surface("Paused", PAUSE_FONT_COLOR)
-# create game clock
-clock = pg.time.Clock()
-# game objects
-obj = {
-    "player": Player(SS / 2),
-    "bullets": [],
-    "enemies": []}
-# movement input variables
-input = Vector2(0)
-# stats
-stats = {
-    "bullets": 10,
-    "killed": 0}
+def reset_game():
+    """resets game data"""
+    global obj
+    obj = {
+        "player": Player(SS / 2),
+        "bullets": [],
+        "enemies": []}
+    global stats
+    stats = {
+        "bullets": 10,
+        "killed": 0}
+    global input
+    input = Vector2(0)
+
+
+# create surfaces
+surface = {
+    "main": pg.display.set_mode(SS),
+    "fade": pg.Surface(SS),
+    "text": {
+        "pause": create_text_surface("Paused", PAUSE_FONT_COLOR),
+        "game_over": create_text_surface("GAME OVER", GAME_OVER_FONT_COLOR),
+        "restart": create_text_surface("Press SPACE to restart", RESTART_FONT_COLOR)}}
+surface["fade"].fill(PAUSE_OVERLAY_COLOR)
+surface["fade"].set_alpha(PAUSE_OVERLAY_ALPHA)
+
+
+# reset game
+reset_game()
 # program states
 program = {
     "running": True,
     "pause": False}
+
 
 # loop
 while program["running"]:
@@ -74,41 +92,46 @@ while program["running"]:
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
-                        program["pause"] = not program["pause"]
-                        if program["pause"]:
-                            # draw pausing overlay
-                            surface.blits([
-                                (surface_pause, (0, 0)),
-                                (surface_pause_text, ((
-                                    SS.x / 2) - (surface_pause_text.get_width() / 2), (
-                                    SS.y / 2) - (surface_pause_text.get_height() / 2)))])
-                    # movement input
-                    case pg.K_w:
-                        input.y -= 1
-                    case pg.K_s:
-                        input.y += 1
-                    case pg.K_a:
-                        input.x -= 1
-                    case pg.K_d:
-                        input.x += 1
+                        if obj["player"].is_alive():
+                            program["pause"] = not program["pause"]
+                            if program["pause"]:
+                                # draw pausing overlay
+                                surface["main"].blits([
+                                    (surface["fade"], (0, 0)),
+                                    (surface["text"]["pause"], ((SS - surface["text"]["pause"].get_size()) / 2))])
+                     # restart game button
+                    case pg.K_SPACE:
+                        if not obj["player"].is_alive():
+                            reset_game()
+                # movement input
+                if obj["player"].is_alive():
+                    match event.key:
+                        case pg.K_w:
+                            input.y -= 1
+                        case pg.K_s:
+                            input.y += 1
+                        case pg.K_a:
+                            input.x -= 1
+                        case pg.K_d:
+                            input.x += 1
             case pg.KEYUP:
-                # actions for keyup events
-                match event.key:
-                    # movement input
-                    case pg.K_w:
-                        input.y += 1
-                    case pg.K_s:
-                        input.y -= 1
-                    case pg.K_a:
-                        input.x += 1
-                    case pg.K_d:
-                        input.x -= 1
+                # movement input
+                if obj["player"].is_alive():
+                    match event.key:
+                        case pg.K_w:
+                            input.y += 1
+                        case pg.K_s:
+                            input.y -= 1
+                        case pg.K_a:
+                            input.x += 1
+                        case pg.K_d:
+                            input.x -= 1
             case pg.MOUSEBUTTONDOWN:
                 # actions for mouse button down events
                 match event.button:
                     # left mouse button click
                     case 1:
-                        if not program["pause"] and stats["bullets"] > 0:
+                        if not program["pause"] and stats["bullets"] > 0 and obj["player"].is_alive():
                             # Calculate direction of bullet from player to mouse
                             mouse_pos = pg.mouse.get_pos()
                             start_pos = obj["player"].pos.copy()
@@ -133,9 +156,10 @@ while program["running"]:
 
         # TODO spawn enemies naturally
         # reset screen
-        surface.fill(BACKGROUND_COLOR)
+        surface["main"].fill(BACKGROUND_COLOR)
         # update game objects
-        obj["player"].update(input)
+        if obj["player"].is_alive():
+            obj["player"].update(input)
         for enemy in obj["enemies"]:
             enemy.update(obj["player"])
         for bullet in obj["bullets"]:
@@ -153,26 +177,36 @@ while program["running"]:
         for obj_str in ["enemies", "bullets"]:
             obj[obj_str] = [go for go in obj[obj_str] if go.is_alive()]
         # draw game objects
-        obj["player"].draw(surface)
+        if obj["player"].is_alive():
+            obj["player"].draw(surface["main"])
         for obj_str in ["enemies", "bullets"]:
             for go in obj[obj_str]:
-                go.draw(surface)
+                go.draw(surface["main"])
         # update ui info
-        ui = [
-            f"killed: {stats['killed']}",
-            f"bullets: {stats['bullets']}",
-            f"life: {obj['player'].life}"]
-        current_height = SS.y
-        # replace ui strings with its blit info
-        for i in range(len(ui)):
-            # create text surface from string
-            debug_surface = create_text_surface(ui[i], DEBUG_FONT_COLOR)
-            # move upwards from last height
-            current_height -= debug_surface.get_height()
-            # replace index with blit information
-            ui[i] = (debug_surface, (2, current_height))
-        # blit surfaces
-        surface.blits(ui)
+        if obj["player"].is_alive():
+            ui = [
+                f"killed: {stats['killed']}",
+                f"bullets: {stats['bullets']}",
+                f"life: {obj['player'].life}"]
+            current_height = SS.y
+            for i in range(len(ui)):
+                # create text surface from string
+                debug_surface = create_text_surface(ui[i], DEBUG_FONT_COLOR)
+                # move upwards from last height
+                current_height -= debug_surface.get_height()
+                # replace index with blit information
+                ui[i] = (debug_surface, (2, current_height))
+            # blit surfaces
+            surface["main"].blits(ui)
+        # if player is dead, blit game over screen
+        if obj["player"].life <= 0:
+            surface["main"].blit(surface["fade"], (0, 0))
+            center = SS / 2
+            surface["main"].blit(surface["text"]["game_over"],
+                                 (center - (Vector2(surface["text"]["game_over"].get_size()) / 2)))
+            center.y += surface["text"]["game_over"].get_height()
+            surface["main"].blit(surface["text"]["restart"],
+                                 (center - (Vector2(surface["text"]["restart"].get_size()) / 2)))
 
     # display surface
     pg.display.flip()
