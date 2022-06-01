@@ -25,13 +25,17 @@ from data.game_object import Player
 pg.init()
 pg.display.set_caption(TITLE)
 # create font
+# TODO create method to easily create different sized fonts
 font = pg.font.Font(FONT_FILE, FONT_SIZE)
-# create game clock
+# program info
 clock = pg.time.Clock()
+input = Vector2(0)
+program = {
+    "pause": False,
+    "running": True}
 # game data
 obj = None
 stats = None
-input = None
 
 
 def create_text_surface(text, color):
@@ -50,8 +54,6 @@ def reset_game():
     stats = {
         "bullets": 10,
         "killed": 0}
-    global input
-    input = Vector2(0)
 
 
 # create surfaces
@@ -64,14 +66,8 @@ surface = {
         "restart": create_text_surface("Press SPACE to restart", RESTART_FONT_COLOR)}}
 surface["fade"].fill(PAUSE_OVERLAY_COLOR)
 surface["fade"].set_alpha(PAUSE_OVERLAY_ALPHA)
-
-
 # reset game
 reset_game()
-# program states
-program = {
-    "running": True,
-    "pause": False}
 
 
 # loop
@@ -104,28 +100,26 @@ while program["running"]:
                         if not obj["player"].is_alive():
                             reset_game()
                 # movement input
-                if obj["player"].is_alive():
-                    match event.key:
-                        case pg.K_w:
-                            input.y -= 1
-                        case pg.K_s:
-                            input.y += 1
-                        case pg.K_a:
-                            input.x -= 1
-                        case pg.K_d:
-                            input.x += 1
+                match event.key:
+                    case pg.K_w:
+                        input.y -= 1
+                    case pg.K_s:
+                        input.y += 1
+                    case pg.K_a:
+                        input.x -= 1
+                    case pg.K_d:
+                        input.x += 1
             case pg.KEYUP:
                 # movement input
-                if obj["player"].is_alive():
-                    match event.key:
-                        case pg.K_w:
-                            input.y += 1
-                        case pg.K_s:
-                            input.y -= 1
-                        case pg.K_a:
-                            input.x += 1
-                        case pg.K_d:
-                            input.x -= 1
+                match event.key:
+                    case pg.K_w:
+                        input.y += 1
+                    case pg.K_s:
+                        input.y -= 1
+                    case pg.K_a:
+                        input.x += 1
+                    case pg.K_d:
+                        input.x -= 1
             case pg.MOUSEBUTTONDOWN:
                 # actions for mouse button down events
                 match event.button:
