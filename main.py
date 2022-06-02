@@ -1,12 +1,15 @@
 import sys
+import random
 import pygame as pg
 from pygame.math import Vector2
 from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_RADIUS
-from data.constants import UI_FONT_COLOR
+from data.constants import ENEMY_SPAWN_DISTANCE
+from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FONT_FILE
 from data.constants import FONT_SIZES
 from data.constants import FPS
+from data.constants import FRAME_TIME
 from data.constants import GAME_OVER_FONT_COLOR
 from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_ALPHA
@@ -16,6 +19,7 @@ from data.constants import RESTART_FONT_COLOR
 from data.constants import SURFACE_SIZE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
+from data.constants import UI_FONT_COLOR
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
@@ -75,6 +79,7 @@ input = Vector2(0)
 program = {
     "pause": False,
     "running": True}
+enemy_spawn = ENEMY_SPAWN_RATE
 # game data
 obj = None
 stats = None
@@ -155,21 +160,18 @@ while program["running"]:
                             start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
                             start_pos += start_offset
                             # Create new bullet object
-                            obj["bullets"].append(
-                                Bullet(start_pos, direction))
+                            obj["bullets"].append(Bullet(start_pos, direction))
                             stats["bullets"] -= 1
-                    # right mouse button click
-                    # TODO remove, only for debugging
-                    case 3:
-                        if not program["pause"]:
-                            # create new enemy
-                            obj["enemies"].append(
-                                Enemy(Vector2(pg.mouse.get_pos())))
 
     # check pause
     if not program["pause"]:
 
-        # TODO spawn enemies naturally
+        # spawn enemies around player
+        enemy_spawn -= FRAME_TIME
+        if enemy_spawn < 0.0:
+            enemy_spawn += ENEMY_SPAWN_RATE
+            obj["enemies"].append(Enemy(obj["player"].pos + (Vector2(
+                random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * ENEMY_SPAWN_DISTANCE)))
         # reset screen
         surface["main"].fill(BACKGROUND_COLOR)
         # update game objects
@@ -213,6 +215,7 @@ while program["running"]:
             surface["main"].blits(ui)
         else:
             surface_apply_game_over()
+        # end of game update
 
     # display surface
     pg.display.flip()
@@ -220,6 +223,6 @@ while program["running"]:
     clock.tick(FPS)
     # end of game loop
 
-# end of program
 pg.quit()
 sys.exit()
+# end of program

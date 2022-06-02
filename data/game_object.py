@@ -11,7 +11,7 @@ from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
 from .constants import ENEMY_SPEED
 from .constants import FPS
-from .constants import MILLISEC_IN_SEC as MS
+from .constants import FRAME_TIME
 from .constants import PLAYER_COLOR
 from .constants import PLAYER_LIFE
 from .constants import PLAYER_RADIUS
@@ -68,11 +68,11 @@ class Bullet(GameObject):
 
     def __init__(self, pos, direction):
         super().__init__(pos, BULLET_RADIUS, BULLET_SPEED,
-                         BULLET_COLOR, float(BULLET_LIFE * MS))
+                         BULLET_COLOR, float(BULLET_LIFE))
         self.direction = direction
 
     def update(self):
-        self.life -= MS / FPS
+        self.life -= FRAME_TIME
         super().update()
 
 
