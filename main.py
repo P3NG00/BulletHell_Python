@@ -28,6 +28,29 @@ def create_text_surface(text, color, size_index=0):
     return font[size_index].render(text, False, color)
 
 
+def surface_apply_fade():
+    """applies fade effect to main surface"""
+    surface["main"].blit(surface["fade"], (0, 0))
+
+
+def surface_apply_pause():
+    """applies pause overlay (over fade) to main surface"""
+    surface_apply_fade()
+    surface["main"].blit(surface["text"]["pause"], ((
+        SURFACE_SIZE - surface["text"]["pause"].get_size()) / 2))
+
+
+def surface_apply_game_over():
+    """applied game over and restart text (over fade) to main surface"""
+    surface_apply_fade()
+    center = SURFACE_SIZE / 2
+    surface["main"].blit(surface["text"]["game_over"],
+                         (center - (Vector2(surface["text"]["game_over"].get_size()) / 2)))
+    center.y += surface["text"]["game_over"].get_height()
+    surface["main"].blit(surface["text"]["restart"],
+                         (center - (Vector2(surface["text"]["restart"].get_size()) / 2)))
+
+
 def reset_game():
     """resets game data"""
     global obj
@@ -84,16 +107,15 @@ while program["running"]:
                     case pg.K_END:
                         program["running"] = False
                     case pg.K_PAGEDOWN:
+                        program["pause"] = True
+                        surface_apply_pause()
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         if obj["player"].is_alive():
                             program["pause"] = not program["pause"]
                             if program["pause"]:
-                                # draw pausing overlay
-                                surface["main"].blits([
-                                    (surface["fade"], (0, 0)),
-                                    (surface["text"]["pause"], ((SURFACE_SIZE - surface["text"]["pause"].get_size()) / 2))])
+                                surface_apply_pause()
                      # restart game button
                     case pg.K_SPACE:
                         if not obj["player"].is_alive():
@@ -190,14 +212,7 @@ while program["running"]:
             # blit surfaces
             surface["main"].blits(ui)
         else:
-            # blit game over screen
-            surface["main"].blit(surface["fade"], (0, 0))
-            center = SURFACE_SIZE / 2
-            surface["main"].blit(surface["text"]["game_over"],
-                                 (center - (Vector2(surface["text"]["game_over"].get_size()) / 2)))
-            center.y += surface["text"]["game_over"].get_height()
-            surface["main"].blit(surface["text"]["restart"],
-                                 (center - (Vector2(surface["text"]["restart"].get_size()) / 2)))
+            surface_apply_game_over()
 
     # display surface
     pg.display.flip()
