@@ -23,6 +23,9 @@ from data.constants import UI_FONT_COLOR
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
+from numpy import cos
+from numpy import pi
+from numpy import sin
 
 """main game script"""
 
@@ -53,6 +56,12 @@ def surface_apply_game_over():
     center.y += surface["text"]["game_over"].get_height()
     surface["main"].blit(surface["text"]["restart"],
                          (center - (Vector2(surface["text"]["restart"].get_size()) / 2)))
+
+
+def random_vector():
+    """returns a unit vector with a random direction"""
+    angle = random.uniform(0, 2 * pi)
+    return Vector2(cos(angle), sin(angle))
 
 
 def reset_game():
@@ -162,6 +171,7 @@ while program["running"]:
                             # Create new bullet object
                             obj["bullets"].append(Bullet(start_pos, direction))
                             stats["bullets"] -= 1
+        # end of event handling
 
     # check pause
     if not program["pause"]:
@@ -170,8 +180,8 @@ while program["running"]:
         enemy_spawn -= FRAME_TIME
         if enemy_spawn < 0.0:
             enemy_spawn += ENEMY_SPAWN_RATE
-            obj["enemies"].append(Enemy(obj["player"].pos + (Vector2(
-                random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * ENEMY_SPAWN_DISTANCE)))
+            obj["enemies"].append(
+                Enemy(obj["player"].pos + (random_vector() * ENEMY_SPAWN_DISTANCE)))
         # reset screen
         surface["main"].fill(BACKGROUND_COLOR)
         # update game objects
