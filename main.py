@@ -70,6 +70,19 @@ def spawn_enemy(distance_scale=1.0):
         obj_player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
+def fire_bullet():
+    # Calculate direction of bullet from player to mouse
+    mouse_pos = pg.mouse.get_pos()
+    start_pos = obj_player.pos.copy()
+    direction = (mouse_pos - start_pos).normalize()
+    # make bullet start in front of player
+    start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
+    start_pos += start_offset
+    # Create new bullet object
+    obj_bullet.append(Bullet(start_pos, direction))
+    stats["bullets"] -= 1
+
+
 def reset_game():
     """resets game data"""
     global obj_player, obj_bullet, obj_enemy, stats
@@ -167,21 +180,9 @@ while running:
                     case pg.K_d:
                         input.x -= 1
             case pg.MOUSEBUTTONDOWN:
-                # actions for mouse button down events
-                match event.button:
-                    # left mouse button click
-                    case 1:
-                        if not pause and stats["bullets"] > 0 and obj_player.is_alive():
-                            # Calculate direction of bullet from player to mouse
-                            mouse_pos = pg.mouse.get_pos()
-                            start_pos = obj_player.pos.copy()
-                            direction = (mouse_pos - start_pos).normalize()
-                            # make bullet start in front of player
-                            start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
-                            start_pos += start_offset
-                            # Create new bullet object
-                            obj_bullet.append(Bullet(start_pos, direction))
-                            stats["bullets"] -= 1
+                # shoot bullet
+                if event.button == 1 and not pause and stats["bullets"] > 0 and obj_player.is_alive():
+                    fire_bullet()
         # end of event handling
 
     # check pause
