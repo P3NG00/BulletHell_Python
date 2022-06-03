@@ -7,6 +7,7 @@ from numpy import sin
 from pygame.math import Vector2
 from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_RADIUS
+from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FONT_FILE
@@ -25,6 +26,7 @@ from data.constants import START_ENEMY_DISTANCE
 from data.constants import START_ENEMY_INCREMENT
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
+from data.constants import TILE_FILE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
 from data.constants import UI_FONT_COLOR
@@ -92,9 +94,9 @@ def reset_game():
     """resets game data"""
     global camera_offset, obj_player, obj_bullet, obj_enemy, stats
     # reset camera offset
-    camera_offset = Vector2(0)
+    camera_offset = -SURFACE_CENTER
     # reset game objects
-    obj_player = Player(SURFACE_CENTER)
+    obj_player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
     # reset game stats
     stats = {
@@ -126,6 +128,9 @@ surface_text_gameover = create_text_surface(
     "GAME OVER", GAMEOVER_FONT_COLOR, 1)
 surface_text_restart = create_text_surface(
     "Press SPACE to restart...", RESTART_FONT_COLOR)
+# background tile image
+# TODO utilize
+tile = pg.image.load(TILE_FILE)
 # game data
 camera_offset = None
 obj_player = None
@@ -196,19 +201,21 @@ while running:
     # check pause
     if not pause:
 
+        # Update
+
         # spawn enemies around player
         current_enemy_spawn_time -= FRAME_TIME
         if current_enemy_spawn_time < 0.0:
             current_enemy_spawn_time += ENEMY_SPAWN_RATE
             spawn_enemy()
-        # reset screen
-        surface_main.fill(BACKGROUND_COLOR)
-        # update game objects
+        # update player
         if obj_player.is_alive():
             obj_player.update(input)
-            # move camera_offset towards player position
-            # TODO make camera not follow directly on player but short distance away while moving
-            camera_offset = obj_player.pos.copy() - SURFACE_CENTER
+        # move camera_offset towards player position
+        camera_offset = camera_offset.slerp(
+            obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
+        # TODO add a looping texture in the background so the player knows what direction they are moving
+        # update game objects
         for enemy in obj_enemy:
             enemy.update(obj_player)
         for bullet in obj_bullet:
@@ -225,6 +232,16 @@ while running:
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
+
+        # Render
+
+        # blit background tiles
+        # TODO replace below statement with a loop to blit tiles to the screen at the offset
+        surface_main.fill(BACKGROUND_COLOR)
+        # TODO 1) test by drawing one tile at center of screen
+        # TODO 2) make 2d tiled background
+        # TODO 3) add offset drawing for only tiles that would be visible on screen
+
         # draw game objects
         if obj_player.is_alive():
             obj_player.draw(surface_main, camera_offset)
@@ -233,21 +250,23 @@ while running:
                 obj.draw(surface_main, camera_offset)
         # display appropriate ui
         if obj_player.is_alive():
-            ui = [f"bullets: {stats['bullets']}",
-                  f"killed: {stats['killed']}",
-                  f"life: {obj_player.life}",
-                  f"pos_y: {obj_player.pos.y:.2f}",
-                  f"pos_x: {obj_player.pos.x:.2f}"]
-            current_height = SURFACE_SIZE.y - UI_BORDER_OFFSET
-            for i in range(len(ui)):
+            # these are printed from bottom of screen upwards
+            ui_info = [f"pos_x: {obj_player.pos.x:.2f}",
+                       f"pos_y: {obj_player.pos.y:.2f}",
+                       f"life: {obj_player.life}",
+                       f"killed: {stats['killed']}",
+                       f"bullets: {stats['bullets']}"]
+            current_height = UI_BORDER_OFFSET
+            for i in range(len(ui_info)):
                 # create text surface from string
-                debug_surface = create_text_surface(ui[i], UI_FONT_COLOR)
-                # move upwards from last height
-                current_height -= debug_surface.get_height()
+                surface_ui = create_text_surface(ui_info[i], UI_FONT_COLOR)
                 # replace index with blit information
-                ui[i] = (debug_surface, (UI_BORDER_OFFSET + 5, current_height))
+                ui_info[i] = (
+                    surface_ui, (UI_BORDER_OFFSET + 5, current_height))
+                # move downwards from last height
+                current_height += surface_ui.get_height()
             # blit surfaces
-            surface_main.blits(ui)
+            surface_main.blits(ui_info)
         else:
             surface_apply_game_over()
         # end of game update
@@ -257,6 +276,8 @@ while running:
     # fps lock
     clock.tick(FPS)
     # end of game loop
+
+# TODO add saving game data
 
 pg.quit()
 sys.exit()

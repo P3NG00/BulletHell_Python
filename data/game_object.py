@@ -23,7 +23,7 @@ class GameObject(ABC):
     """in-game objects"""
 
     @abstractmethod
-    def __init__(self, pos, radius, speed, color, life=None):
+    def __init__(self, pos: Vector2, radius: float, speed: float, color: pg.Color, life: float = None):
         self.pos = pos.copy()
         self.radius = radius
         self.speed = speed
@@ -39,7 +39,7 @@ class GameObject(ABC):
         """moves the game object with its direction"""
         self.pos += (self.direction * self.speed) / FPS
 
-    def draw(self, surface, camera_offset):
+    def draw(self, surface: pg.Surface, camera_offset: Vector2):
         """draws the object to the surface"""
         pg.draw.circle(surface, self.color, self.pos -
                        camera_offset, self.radius)
@@ -51,14 +51,14 @@ class GameObject(ABC):
 class Player(GameObject):
     """player game object"""
 
-    def __init__(self, pos):
+    def __init__(self, pos: Vector2):
         super().__init__(pos, PLAYER_RADIUS, PLAYER_SPEED, PLAYER_COLOR, PLAYER_LIFE)
 
-    def update(self, input):
+    def update(self, input: Vector2):
         """used to handle movement input"""
         # normalize input vector
         self.direction = input
-        if self.direction.magnitude() not in [0.0, 1.0]:
+        if self.direction.is_normalized():
             self.direction = self.direction.normalize()
         # update movement this frame
         super().update()
@@ -67,7 +67,7 @@ class Player(GameObject):
 class Bullet(GameObject):
     """bullet game object"""
 
-    def __init__(self, pos, direction):
+    def __init__(self, pos: Vector2, direction: Vector2):
         super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, float(BULLET_LIFE))
         self.direction = direction
 
@@ -79,10 +79,10 @@ class Bullet(GameObject):
 class Enemy(GameObject):
     """enemy game object"""
 
-    def __init__(self, pos):
+    def __init__(self, pos: Vector2):
         super().__init__(pos, ENEMY_RADIUS, ENEMY_SPEED, ENEMY_COLOR, ENEMY_LIFE)
 
-    def update(self, player):
+    def update(self, player: Player):
         """moves the enemy towards the player"""
         # move towards player position
         self.direction = (player.pos - self.pos).normalize()
