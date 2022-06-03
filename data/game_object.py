@@ -39,9 +39,10 @@ class GameObject(ABC):
         """moves the game object with its direction"""
         self.pos += (self.direction * self.speed) / FPS
 
-    def draw(self, surface):
+    def draw(self, surface, camera_offset):
         """draws the object to the surface"""
-        pg.draw.circle(surface, self.color, self.pos, self.radius)
+        pg.draw.circle(surface, self.color, self.pos -
+                       camera_offset, self.radius)
 
     def is_touching(self, other):
         return (self.pos - other.pos).magnitude() < self.radius + other.radius

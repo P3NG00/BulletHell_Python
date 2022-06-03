@@ -20,7 +20,10 @@ from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
 from data.constants import START_BULLETS
-from data.constants import START_ENEMIES
+from data.constants import START_ENEMY_AMOUNT
+from data.constants import START_ENEMY_DISTANCE
+from data.constants import START_ENEMY_INCREMENT
+from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
@@ -74,7 +77,7 @@ def spawn_enemy(distance_scale=1.0):
 
 def fire_bullet():
     # Calculate direction of bullet from player to mouse
-    mouse_pos = pg.mouse.get_pos()
+    mouse_pos = pg.mouse.get_pos() + camera_offset
     start_pos = obj_player.pos.copy()
     direction = (mouse_pos - start_pos).normalize()
     # make bullet start in front of player
@@ -87,17 +90,19 @@ def fire_bullet():
 
 def reset_game():
     """resets game data"""
-    global obj_player, obj_bullet, obj_enemy, stats
+    global camera_offset, obj_player, obj_bullet, obj_enemy, stats
+    # reset camera offset
+    camera_offset = Vector2(0)
     # reset game objects
-    obj_player = Player(SURFACE_SIZE / 2)
+    obj_player = Player(SURFACE_CENTER)
     obj_bullet, obj_enemy = [], []
     # reset game stats
     stats = {
         "bullets": START_BULLETS,
         "killed": 0}
     # spawn enemies shorter than regular spawn distance
-    for _ in range(START_ENEMIES):
-        spawn_enemy(0.6)
+    for i in range(START_ENEMY_AMOUNT):
+        spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
 
 
 # initialize pygame
@@ -122,6 +127,7 @@ surface_text_gameover = create_text_surface(
 surface_text_restart = create_text_surface(
     "Press SPACE to restart...", RESTART_FONT_COLOR)
 # game data
+camera_offset = None
 obj_player = None
 obj_bullet = None
 obj_enemy = None
@@ -200,6 +206,9 @@ while running:
         # update game objects
         if obj_player.is_alive():
             obj_player.update(input)
+            # move camera_offset towards player position
+            # TODO make camera not follow directly on player but short distance away while moving
+            camera_offset = obj_player.pos.copy() - SURFACE_CENTER
         for enemy in obj_enemy:
             enemy.update(obj_player)
         for bullet in obj_bullet:
@@ -218,14 +227,17 @@ while running:
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
         # draw game objects
         if obj_player.is_alive():
-            obj_player.draw(surface_main)
+            obj_player.draw(surface_main, camera_offset)
         for obj_list in [obj_enemy, obj_bullet]:
             for obj in obj_list:
-                obj.draw(surface_main)
+                obj.draw(surface_main, camera_offset)
         # display appropriate ui
         if obj_player.is_alive():
-            ui = [f"{stat}: {stats[stat]}" for stat in ["bullets", "killed"]]
-            ui.append(f"life: {obj_player.life}")
+            ui = [f"bullets: {stats['bullets']}",
+                  f"killed: {stats['killed']}",
+                  f"life: {obj_player.life}",
+                  f"pos_y: {obj_player.pos.y:.2f}",
+                  f"pos_x: {obj_player.pos.x:.2f}"]
             current_height = SURFACE_SIZE.y - UI_BORDER_OFFSET
             for i in range(len(ui)):
                 # create text surface from string
