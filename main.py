@@ -212,7 +212,7 @@ while running:
         if obj_player.is_alive():
             obj_player.update(input)
         # move camera_offset towards player position
-        camera_offset = camera_offset.slerp(
+        camera_offset = camera_offset.lerp(
             obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
         # TODO add a looping texture in the background so the player knows what direction they are moving
         # update game objects
