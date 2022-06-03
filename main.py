@@ -64,17 +64,31 @@ def random_vector():
     return Vector2(cos(angle), sin(angle))
 
 
+def spawn_enemy(distance_scale=1.0):
+    """spawns enemy at random position"""
+    global enemy_spawn
+    enemy_spawn += ENEMY_SPAWN_RATE
+    start_pos = obj["player"].pos + \
+        (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)
+    obj["enemies"].append(Enemy(start_pos))
+
+
 def reset_game():
     """resets game data"""
+    # reset game objects
     global obj
     obj = {
         "player": Player(SURFACE_SIZE / 2),
         "bullets": [],
         "enemies": []}
+    # reset game stats
     global stats
     stats = {
         "bullets": 10,
         "killed": 0}
+    # spawn 10 enemies at half regular spawn distance
+    for _ in range(10):
+        spawn_enemy(0.5)
 
 
 # initialize pygame
@@ -179,9 +193,7 @@ while program["running"]:
         # spawn enemies around player
         enemy_spawn -= FRAME_TIME
         if enemy_spawn < 0.0:
-            enemy_spawn += ENEMY_SPAWN_RATE
-            obj["enemies"].append(
-                Enemy(obj["player"].pos + (random_vector() * ENEMY_SPAWN_DISTANCE)))
+            spawn_enemy()
         # reset screen
         surface["main"].fill(BACKGROUND_COLOR)
         # update game objects
