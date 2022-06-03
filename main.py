@@ -19,6 +19,8 @@ from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
+from data.constants import START_BULLETS
+from data.constants import START_ENEMIES
 from data.constants import SURFACE_SIZE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
@@ -60,14 +62,14 @@ def surface_apply_game_over():
 
 def random_vector():
     """returns a unit vector with a random direction"""
-    angle = random.uniform(0, 2 * pi)
-    return Vector2(cos(angle), sin(angle))
+    random_angle = random.uniform(0, 2 * pi)
+    return Vector2(cos(random_angle), sin(random_angle))
 
 
 def spawn_enemy(distance_scale=1.0):
     """spawns enemy at random position"""
-    obj_enemy.append(Enemy(
-        obj_player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)))
+    obj_enemy.append(Enemy(obj_player.pos + (random_vector()
+                     * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
 def fire_bullet():
@@ -91,10 +93,10 @@ def reset_game():
     obj_bullet, obj_enemy = [], []
     # reset game stats
     stats = {
-        "bullets": 10,
+        "bullets": START_BULLETS,
         "killed": 0}
     # spawn enemies shorter than regular spawn distance
-    for _ in range(5):
+    for _ in range(START_ENEMIES):
         spawn_enemy(0.6)
 
 
@@ -158,7 +160,7 @@ while running:
                     case pg.K_SPACE:
                         if not obj_player.is_alive():
                             reset_game()
-                # movement input
+                # movement input press
                 match event.key:
                     case pg.K_w:
                         input.y -= 1
@@ -169,7 +171,7 @@ while running:
                     case pg.K_d:
                         input.x += 1
             case pg.KEYUP:
-                # movement input
+                # movement input release
                 match event.key:
                     case pg.K_w:
                         input.y += 1
@@ -217,10 +219,9 @@ while running:
         # draw game objects
         if obj_player.is_alive():
             obj_player.draw(surface_main)
-        for enemy in obj_enemy:
-            enemy.draw(surface_main)
-        for bullet in obj_bullet:
-            bullet.draw(surface_main)
+        for obj_list in [obj_enemy, obj_bullet]:
+            for obj in obj_list:
+                obj.draw(surface_main)
         # display appropriate ui
         if obj_player.is_alive():
             ui = [f"{stat}: {stats[stat]}" for stat in ["bullets", "killed"]]
