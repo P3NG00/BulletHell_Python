@@ -15,7 +15,6 @@ from data.constants import FPS
 from data.constants import FRAME_TIME
 from data.constants import GAMEOVER_FONT_COLOR
 from data.constants import PAUSE_FONT_COLOR
-from data.constants import PAUSE_OVERLAY_ALPHA
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
@@ -120,7 +119,7 @@ current_enemy_spawn_time = ENEMY_SPAWN_RATE
 surface_main = pg.display.set_mode(SURFACE_SIZE)
 surface_fade = pg.Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
-surface_fade.set_alpha(PAUSE_OVERLAY_ALPHA)
+surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
 surface_text_pause = create_text_surface(
     "Paused", PAUSE_FONT_COLOR, FontType.NORMAL)
 surface_text_gameover = create_text_surface(
