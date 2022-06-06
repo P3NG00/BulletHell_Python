@@ -1,4 +1,3 @@
-import sys
 import random
 import pygame as pg
 from numpy import cos
@@ -78,6 +77,7 @@ def spawn_enemy(distance_scale=1.0):
 
 
 def fire_bullet():
+    """fires a bullet in the direction of the mouse"""
     # Calculate direction of bullet from player to mouse
     mouse_pos = pg.mouse.get_pos() + camera_offset
     start_pos = obj_player.pos.copy()
@@ -229,14 +229,14 @@ while running:
         # fill background
         surface_main.fill(BACKGROUND_COLOR)
         # blit background tiles
-        start_pos = Vector2((-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x,
-                            (-camera_offset.y % TILE_SIZE.y) - TILE_SIZE.y)
-        current_pos = start_pos.copy()
+        start_x = (-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x
+        current_pos = Vector2(start_x, (-camera_offset.y %
+                              TILE_SIZE.y) - TILE_SIZE.y)
         while current_pos.y < SURFACE_SIZE.y:
             while current_pos.x < SURFACE_SIZE.x:
                 surface_main.blit(TILE, current_pos)
                 current_pos.x += TILE_SIZE.x
-            current_pos.x = start_pos.x
+            current_pos.x = start_x
             current_pos.y += TILE_SIZE.y
         # draw game objects
         if obj_player.is_alive():
@@ -275,5 +275,4 @@ while running:
     # end of game loop
 
 pg.quit()
-sys.exit()
 # end of program

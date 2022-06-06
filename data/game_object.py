@@ -68,7 +68,7 @@ class Bullet(GameObject):
     """bullet game object"""
 
     def __init__(self, pos: Vector2, direction: Vector2):
-        super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, float(BULLET_LIFE))
+        super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, BULLET_LIFE)
         self.direction = direction
 
     def update(self):
