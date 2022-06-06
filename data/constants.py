@@ -1,8 +1,25 @@
 import pygame as pg
+from enum import Enum
+from pygame.font import Font
+from pygame.image import load as load_image
 from pygame import Color
 from pygame import Vector2
 
 """ constant game values """
+
+
+# font types
+class FontType(Enum):
+    """font types"""
+    NORMAL = 0
+    UI = 1
+    GAMEOVER = 2
+
+
+def create_font(size: int):
+    """creates a font object of specified size"""
+    return Font(FONT_FILE, size)
+
 
 pg.font.init()
 
@@ -14,7 +31,6 @@ FPS = 65.0
 FRAME_TIME = 1000.0 / FPS  # in milliseconds
 
 # game values
-BACKGROUND_COLOR = Color(32, 32, 32)
 BULLET_COLOR = Color(0, 128, 255)
 BULLET_LIFE = 1000.0  # in milliseconds
 BULLET_RADIUS = 4.0
@@ -27,8 +43,9 @@ ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude()
 ENEMY_SPAWN_RATE = 1250  # in milliseconds
 ENEMY_SPEED = 150.0
 FONT_FILE = "data/upheavtt.ttf"
-FONT_SIZES = [24, 64]
-FONTS = [pg.font.Font(FONT_FILE, fs) for fs in FONT_SIZES]
+FONTS = {FontType.NORMAL: create_font(24),
+         FontType.UI: create_font(16),
+         FontType.GAMEOVER: create_font(64)}
 GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0)
@@ -42,7 +59,7 @@ START_BULLETS = 10
 START_ENEMY_AMOUNT = 3
 START_ENEMY_DISTANCE = 0.55
 START_ENEMY_INCREMENT = 0.1
-TILE = pg.image.load("data/tile.png")
+TILE = load_image("data/tile.png")
 TILE_SIZE = Vector2(TILE.get_size())
 TILE_CENTER = TILE_SIZE / 2
 UI_BORDER_OFFSET = 15

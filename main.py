@@ -3,13 +3,14 @@ import pygame as pg
 from numpy import cos
 from numpy import pi
 from numpy import sin
+from pygame.color import Color
 from pygame.math import Vector2
-from data.constants import BACKGROUND_COLOR
 from data.constants import BULLET_RADIUS
 from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FONTS
+from data.constants import FontType
 from data.constants import FPS
 from data.constants import FRAME_TIME
 from data.constants import GAMEOVER_FONT_COLOR
@@ -36,9 +37,9 @@ from data.game_object import Player
 """main game script"""
 
 
-def create_text_surface(text, color, size_index=0):
+def create_text_surface(text: str, color: Color, font_type: FontType):
     """returns a surface with colored text"""
-    return FONTS[size_index].render(text, False, color)
+    return FONTS[font_type].render(text, False, color)
 
 
 def surface_apply_fade():
@@ -70,7 +71,7 @@ def random_vector():
     return Vector2(cos(random_angle), sin(random_angle))
 
 
-def spawn_enemy(distance_scale=1.0):
+def spawn_enemy(distance_scale: float = 1.0):
     """spawns enemy at random position"""
     obj_enemy.append(Enemy(obj_player.pos + (random_vector()
                      * ENEMY_SPAWN_DISTANCE * distance_scale)))
@@ -120,11 +121,12 @@ surface_main = pg.display.set_mode(SURFACE_SIZE)
 surface_fade = pg.Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_ALPHA)
-surface_text_pause = create_text_surface("Paused", PAUSE_FONT_COLOR)
+surface_text_pause = create_text_surface(
+    "Paused", PAUSE_FONT_COLOR, FontType.NORMAL)
 surface_text_gameover = create_text_surface(
-    "GAME OVER", GAMEOVER_FONT_COLOR, 1)
+    "GAME OVER", GAMEOVER_FONT_COLOR, FontType.GAMEOVER)
 surface_text_restart = create_text_surface(
-    "Press SPACE to restart...", RESTART_FONT_COLOR)
+    "Press SPACE to restart...", RESTART_FONT_COLOR, FontType.NORMAL)
 # game data
 camera_offset = None
 obj_player = None
@@ -226,8 +228,6 @@ while running:
 
         # Render
 
-        # fill background
-        surface_main.fill(BACKGROUND_COLOR)
         # blit background tiles
         start_x = (-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x
         current_pos = Vector2(start_x, (-camera_offset.y %
@@ -256,7 +256,8 @@ while running:
             current_height = UI_BORDER_OFFSET
             for i in range(len(ui_info)):
                 # create text surface from string
-                surface_ui = create_text_surface(ui_info[i], UI_FONT_COLOR)
+                surface_ui = create_text_surface(
+                    ui_info[i], UI_FONT_COLOR, FontType.UI)
                 # replace index with blit information
                 ui_info[i] = (
                     surface_ui, (UI_BORDER_OFFSET + 5, current_height))
