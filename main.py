@@ -10,8 +10,7 @@ from data.constants import BULLET_RADIUS
 from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
-from data.constants import FONT_FILE
-from data.constants import FONT_SIZES
+from data.constants import FONTS
 from data.constants import FPS
 from data.constants import FRAME_TIME
 from data.constants import GAMEOVER_FONT_COLOR
@@ -26,7 +25,8 @@ from data.constants import START_ENEMY_DISTANCE
 from data.constants import START_ENEMY_INCREMENT
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
-from data.constants import TILE_FILE
+from data.constants import TILE
+from data.constants import TILE_SIZE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
 from data.constants import UI_FONT_COLOR
@@ -39,7 +39,7 @@ from data.game_object import Player
 
 def create_text_surface(text, color, size_index=0):
     """returns a surface with colored text"""
-    return font[size_index].render(text, False, color)
+    return FONTS[size_index].render(text, False, color)
 
 
 def surface_apply_fade():
@@ -108,10 +108,7 @@ def reset_game():
 
 
 # initialize pygame
-pg.init()
 pg.display.set_caption(TITLE)
-# create fonts
-font = [pg.font.Font(FONT_FILE, font_size) for font_size in FONT_SIZES]
 # program info
 clock = pg.time.Clock()
 input = Vector2(0)
@@ -128,9 +125,6 @@ surface_text_gameover = create_text_surface(
     "GAME OVER", GAMEOVER_FONT_COLOR, 1)
 surface_text_restart = create_text_surface(
     "Press SPACE to restart...", RESTART_FONT_COLOR)
-# background tile image
-# TODO utilize
-tile = pg.image.load(TILE_FILE)
 # game data
 camera_offset = None
 obj_player = None
@@ -162,10 +156,8 @@ while running:
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         if obj_player.is_alive():
+                            pause = not pause
                             if pause:
-                                pause = False
-                            else:
-                                pause = True
                                 surface_apply_pause()
                     # restart game button
                     case pg.K_SPACE:
@@ -214,7 +206,6 @@ while running:
         # move camera_offset towards player position
         camera_offset = camera_offset.lerp(
             obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
-        # TODO add a looping texture in the background so the player knows what direction they are moving
         # update game objects
         for enemy in obj_enemy:
             enemy.update(obj_player)
@@ -235,13 +226,18 @@ while running:
 
         # Render
 
-        # blit background tiles
-        # TODO replace below statement with a loop to blit tiles to the screen at the offset
+        # fill background
         surface_main.fill(BACKGROUND_COLOR)
-        # TODO 1) test by drawing one tile at center of screen
-        # TODO 2) make 2d tiled background
-        # TODO 3) add offset drawing for only tiles that would be visible on screen
-
+        # blit background tiles
+        start_pos = Vector2((-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x,
+                            (-camera_offset.y % TILE_SIZE.y) - TILE_SIZE.y)
+        current_pos = start_pos.copy()
+        while current_pos.y < SURFACE_SIZE.y:
+            while current_pos.x < SURFACE_SIZE.x:
+                surface_main.blit(TILE, current_pos)
+                current_pos.x += TILE_SIZE.x
+            current_pos.x = start_pos.x
+            current_pos.y += TILE_SIZE.y
         # draw game objects
         if obj_player.is_alive():
             obj_player.draw(surface_main, camera_offset)
@@ -250,12 +246,13 @@ while running:
                 obj.draw(surface_main, camera_offset)
         # display appropriate ui
         if obj_player.is_alive():
-            # these are printed from bottom of screen upwards
+            # these are printed top to bottom
             ui_info = [f"pos_x: {obj_player.pos.x:.2f}",
                        f"pos_y: {obj_player.pos.y:.2f}",
-                       f"life: {obj_player.life}",
+                       f"fps: {clock.get_fps():.2f}",
                        f"killed: {stats['killed']}",
-                       f"bullets: {stats['bullets']}"]
+                       f"bullets: {stats['bullets']}",
+                       f"life: {obj_player.life}"]
             current_height = UI_BORDER_OFFSET
             for i in range(len(ui_info)):
                 # create text surface from string
@@ -276,8 +273,6 @@ while running:
     # fps lock
     clock.tick(FPS)
     # end of game loop
-
-# TODO add saving game data
 
 pg.quit()
 sys.exit()

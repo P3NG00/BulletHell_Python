@@ -24,7 +24,7 @@ class GameObject(ABC):
 
     @abstractmethod
     def __init__(self, pos: Vector2, radius: float, speed: float, color: pg.Color, life: float = None):
-        self.pos = pos.copy()
+        self.pos = pos
         self.radius = radius
         self.speed = speed
         self.color = color

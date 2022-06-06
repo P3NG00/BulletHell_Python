@@ -1,7 +1,10 @@
+import pygame as pg
 from pygame import Color
 from pygame import Vector2
 
 """ constant game values """
+
+pg.font.init()
 
 # window properties
 SURFACE_SIZE = Vector2(1280, 720)
@@ -16,7 +19,7 @@ BULLET_COLOR = Color(0, 128, 255)
 BULLET_LIFE = 1000  # in milliseconds
 BULLET_RADIUS = 4.0
 BULLET_SPEED = 450.0
-CAMERA_SPEED = 0.025
+CAMERA_SPEED = 0.035
 ENEMY_COLOR = Color(255, 0, 0)
 ENEMY_LIFE = 1.0
 ENEMY_RADIUS = 12.0
@@ -25,6 +28,7 @@ ENEMY_SPAWN_RATE = 1500  # in milliseconds
 ENEMY_SPEED = 150.0
 FONT_FILE = "data/upheavtt.ttf"
 FONT_SIZES = [24, 64]
+FONTS = [pg.font.Font(FONT_FILE, fs) for fs in FONT_SIZES]
 GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0)
@@ -38,6 +42,8 @@ START_BULLETS = 10
 START_ENEMY_AMOUNT = 3
 START_ENEMY_DISTANCE = 0.55
 START_ENEMY_INCREMENT = 0.1
-TILE_FILE = "data/tile.png"
+TILE = pg.image.load("data/tile.png")
+TILE_SIZE = Vector2(TILE.get_size())
+TILE_CENTER = TILE_SIZE / 2
 UI_BORDER_OFFSET = 20
 UI_FONT_COLOR = Color(192, 192, 192)
