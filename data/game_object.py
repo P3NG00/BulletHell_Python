@@ -60,7 +60,7 @@ class Player(GameObject):
         """used to handle movement input"""
         # normalize input vector
         self.direction = input
-        if self.direction.is_normalized():
+        if self.direction.length() != 0.0 and not self.direction.is_normalized():
             self.direction = self.direction.normalize()
         # update movement this frame
         super().update()
