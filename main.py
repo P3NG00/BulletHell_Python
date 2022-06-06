@@ -254,14 +254,11 @@ while running:
                        f"life: {obj_player.life}"]
             current_height = UI_BORDER_OFFSET
             for i in range(len(ui_info)):
-                # create text surface from string
-                surface_ui = create_text_surface(
-                    ui_info[i], UI_FONT_COLOR, FontType.UI)
                 # replace index with blit information
-                ui_info[i] = (
-                    surface_ui, (UI_BORDER_OFFSET + 5, current_height))
+                ui_info[i] = (create_text_surface(
+                    ui_info[i], UI_FONT_COLOR, FontType.UI), (UI_BORDER_OFFSET + 5, current_height))
                 # move downwards from last height
-                current_height += surface_ui.get_height()
+                current_height += ui_info[i][0].get_height()
             # blit surfaces
             surface_main.blits(ui_info)
         else:
