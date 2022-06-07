@@ -12,7 +12,6 @@ from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FONTS
 from data.constants import FontType
 from data.constants import FPS
-from data.constants import FRAME_TIME
 from data.constants import GAMEOVER_FONT_COLOR
 from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_COLOR
@@ -49,8 +48,8 @@ def surface_apply_fade():
 def surface_apply_pause():
     """applies pause overlay (over fade) to main surface"""
     surface_apply_fade()
-    surface_main.blit(surface_text_pause,
-                      ((SURFACE_SIZE - surface_text_pause.get_size()) / 2))
+    surface_main.blit(surface_text_pause, (SURFACE_SIZE -
+                      surface_text_pause.get_size()) / 2)
 
 
 def surface_apply_game_over():
@@ -197,9 +196,9 @@ while running:
         # Update
 
         # spawn enemies around player
-        current_enemy_spawn_time -= FRAME_TIME
-        if current_enemy_spawn_time < 0.0:
-            current_enemy_spawn_time += ENEMY_SPAWN_RATE
+        current_enemy_spawn_time -= 1
+        if current_enemy_spawn_time <= 0:
+            current_enemy_spawn_time = ENEMY_SPAWN_RATE
             spawn_enemy()
         # update player
         if obj_player.is_alive():
