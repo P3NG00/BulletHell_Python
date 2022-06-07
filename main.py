@@ -204,12 +204,18 @@ while running:
         # update player
         if obj_player.is_alive():
             obj_player.update(input)
-        # move camera_offset towards player position
-        camera_offset = camera_offset.lerp(
-            obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
-        # update game objects
+        # update enemies
         for enemy in obj_enemy:
             enemy.update(obj_player)
+            # test enemy collision
+            for enemy_ in obj_enemy:
+                if enemy_ is enemy:
+                    continue
+                if enemy_.is_touching(enemy):
+                    enemy.pos = enemy_.pos - \
+                        (enemy_.pos - enemy.pos).normalize() * \
+                        (enemy_.radius + enemy.radius)
+        # update bullets
         for bullet in obj_bullet:
             bullet.update()
             # check bullet collision
@@ -224,6 +230,9 @@ while running:
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
+        # move camera_offset towards player position
+        camera_offset = camera_offset.lerp(
+            obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
 
         # Render
 
