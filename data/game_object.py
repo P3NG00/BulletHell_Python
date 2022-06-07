@@ -46,7 +46,7 @@ class GameObject(ABC):
         draw_circle(surface, self.color, self.pos -
                     camera_offset, self.radius)
 
-    def is_touching(self, other) -> bool:
+    def is_touching(self, other: 'GameObject') -> bool:
         return (self.pos - other.pos).magnitude() < self.radius + other.radius
 
 
