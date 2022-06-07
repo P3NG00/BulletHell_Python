@@ -56,11 +56,11 @@ def surface_apply_game_over():
     """applied game over and restart text (over fade) to main surface"""
     surface_apply_fade()
     center = SURFACE_SIZE / 2
-    surface_main.blit(surface_text_gameover, (center -
-                      (Vector2(surface_text_gameover.get_size()) / 2)))
+    surface_main.blit(surface_text_gameover, center -
+                      Vector2(surface_text_gameover.get_size()) / 2)
     center.y += surface_text_gameover.get_height()
-    surface_main.blit(surface_text_restart, (center -
-                      (Vector2(surface_text_restart.get_size()) / 2)))
+    surface_main.blit(surface_text_restart, center -
+                      Vector2(surface_text_restart.get_size()) / 2)
 
 
 def random_vector():
@@ -78,15 +78,12 @@ def spawn_enemy(distance_scale: float = 1.0):
 def fire_bullet():
     """fires a bullet in the direction of the mouse"""
     # Calculate direction of bullet from player to mouse
-    mouse_pos = pg.mouse.get_pos() + camera_offset
     start_pos = obj_player.pos.copy()
-    direction = (mouse_pos - start_pos).normalize()
+    direction = (pg.mouse.get_pos() + camera_offset - start_pos).normalize()
     # make bullet start in front of player
-    start_offset = direction.normalize() * (PLAYER_RADIUS + BULLET_RADIUS)
-    start_pos += start_offset
+    start_pos += direction * (PLAYER_RADIUS + BULLET_RADIUS)
     # Create new bullet object
     obj_bullet.append(Bullet(start_pos, direction))
-    stats["bullets"] -= 1
 
 
 def reset_game():
@@ -188,6 +185,7 @@ while running:
                 # shoot bullet
                 if event.button == 1 and not pause and stats["bullets"] > 0 and obj_player.is_alive():
                     fire_bullet()
+                    stats["bullets"] -= 1
         # end of event handling
 
     # check pause
