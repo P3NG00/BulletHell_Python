@@ -16,14 +16,14 @@ class FontType(Enum):
     GAMEOVER = 2
 
 
-def create_font(size: int):
+def create_font(size: int) -> Font:
     """creates a font object of specified size"""
     return Font(FONT_FILE, size)
 
 
-def seconds_to_frames(seconds: float):
+def seconds_to_frames(seconds: float) -> int:
     """returns the amount of frames in the given amount of seconds"""
-    return FPS * seconds
+    return int(FPS * seconds)
 
 
 # window properties
