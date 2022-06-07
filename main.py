@@ -32,6 +32,7 @@ from data.constants import UI_FONT_COLOR
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
+from data.game_object import test_collision
 
 """main game script"""
 
@@ -207,10 +208,7 @@ while running:
             enemy.update(obj_player)
             # test enemy collision
             for enemy_ in obj_enemy:
-                if enemy_ is not enemy and enemy_.is_touching(enemy):
-                    enemy.pos = enemy_.pos - \
-                        (enemy_.pos - enemy.pos).normalize() * \
-                        (enemy_.radius + enemy.radius)
+                test_collision(enemy, enemy_)
         # update bullets
         for bullet in obj_bullet:
             bullet.update()
