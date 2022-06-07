@@ -33,20 +33,20 @@ class GameObject(ABC):
         self.life = life
         self.direction = Vector2(0)
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         """returns if the game object has life remaining"""
         return self.life > 0.0
 
-    def update(self):
+    def update(self) -> None:
         """moves the game object with its direction"""
         self.pos += (self.direction * self.speed) / FPS
 
-    def draw(self, surface: Surface, camera_offset: Vector2):
+    def draw(self, surface: Surface, camera_offset: Vector2) -> None:
         """draws the object to the surface"""
         draw_circle(surface, self.color, self.pos -
                     camera_offset, self.radius)
 
-    def is_touching(self, other):
+    def is_touching(self, other) -> bool:
         return (self.pos - other.pos).magnitude() < self.radius + other.radius
 
 
@@ -57,17 +57,17 @@ class Player(GameObject):
         super().__init__(pos, PLAYER_RADIUS, PLAYER_SPEED, PLAYER_COLOR, PLAYER_LIFE)
         self.i_frames = 0
 
-    def is_vulnerable(self):
+    def is_vulnerable(self) -> bool:
         """returns if the player can take damage"""
         return self.i_frames == 0
 
-    def damage(self):
+    def damage(self) -> None:
         """reduces the player's life and starts i-frames"""
         if self.is_vulnerable():
             self.life -= 1
             self.i_frames = PLAYER_I_FRAMES
 
-    def update(self, input: Vector2):
+    def update(self, input: Vector2) -> None:
         """used to handle movement input"""
         # handle i-frames
         if not self.is_vulnerable():
@@ -79,7 +79,7 @@ class Player(GameObject):
         # update movement this frame
         super().update()
 
-    def draw(self, surface: Surface, camera_offset: Vector2):
+    def draw(self, surface: Surface, camera_offset: Vector2) -> None:
         """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
             super().draw(surface, camera_offset)
@@ -92,7 +92,7 @@ class Bullet(GameObject):
         super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, BULLET_LIFE)
         self.direction = direction
 
-    def update(self):
+    def update(self) -> None:
         self.life -= 1
         super().update()
 
@@ -103,7 +103,7 @@ class Enemy(GameObject):
     def __init__(self, pos: Vector2):
         super().__init__(pos, ENEMY_RADIUS, ENEMY_SPEED, ENEMY_COLOR, ENEMY_LIFE)
 
-    def update(self, player: Player):
+    def update(self, player: Player) -> None:
         """moves the enemy towards the player"""
         # move towards player position
         self.direction = (player.pos - self.pos).normalize()

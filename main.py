@@ -3,6 +3,7 @@ import pygame as pg
 from numpy import cos
 from numpy import pi
 from numpy import sin
+from pygame import Surface
 from pygame.color import Color
 from pygame.math import Vector2
 from data.constants import BULLET_RADIUS
@@ -35,24 +36,24 @@ from data.game_object import Player
 """main game script"""
 
 
-def create_text_surface(text: str, color: Color, font_type: FontType):
+def create_text_surface(text: str, color: Color, font_type: FontType) -> Surface:
     """returns a surface with colored text"""
     return FONTS[font_type].render(text, False, color)
 
 
-def surface_apply_fade():
+def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
     surface_main.blit(surface_fade, (0, 0))
 
 
-def surface_apply_pause():
+def surface_apply_pause() -> None:
     """applies pause overlay (over fade) to main surface"""
     surface_apply_fade()
     surface_main.blit(surface_text_pause, (SURFACE_SIZE -
                       surface_text_pause.get_size()) / 2)
 
 
-def surface_apply_game_over():
+def surface_apply_game_over() -> None:
     """applied game over and restart text (over fade) to main surface"""
     surface_apply_fade()
     center = SURFACE_SIZE / 2
@@ -63,19 +64,19 @@ def surface_apply_game_over():
                       Vector2(surface_text_restart.get_size()) / 2)
 
 
-def random_vector():
+def random_vector() -> Vector2:
     """returns a unit vector with a random direction"""
     random_angle = random.uniform(0, 2 * pi)
     return Vector2(cos(random_angle), sin(random_angle))
 
 
-def spawn_enemy(distance_scale: float = 1.0):
+def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
     obj_enemy.append(Enemy(obj_player.pos + (random_vector()
                      * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
-def fire_bullet():
+def fire_bullet() -> None:
     """fires a bullet in the direction of the mouse"""
     # Calculate direction of bullet from player to mouse
     start_pos = obj_player.pos.copy()
@@ -86,7 +87,7 @@ def fire_bullet():
     obj_bullet.append(Bullet(start_pos, direction))
 
 
-def reset_game():
+def reset_game() -> None:
     """resets game data"""
     global camera_offset, obj_player, obj_bullet, obj_enemy, stats
     # reset camera offset
@@ -113,7 +114,7 @@ running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
 # create surfaces
 surface_main = pg.display.set_mode(SURFACE_SIZE)
-surface_fade = pg.Surface(SURFACE_SIZE)
+surface_fade = Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
 surface_text_pause = create_text_surface(
