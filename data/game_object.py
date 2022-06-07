@@ -80,7 +80,7 @@ class Player(GameObject):
         super().update()
 
     def draw(self, surface: Surface, camera_offset: Vector2):
-        """draws the player. if player has taken damage, draw every other frame"""
+        """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
             super().draw(surface, camera_offset)
 

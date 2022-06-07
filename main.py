@@ -208,9 +208,7 @@ while running:
             enemy.update(obj_player)
             # test enemy collision
             for enemy_ in obj_enemy:
-                if enemy_ is enemy:
-                    continue
-                if enemy_.is_touching(enemy):
+                if enemy_ is not enemy and enemy_.is_touching(enemy):
                     enemy.pos = enemy_.pos - \
                         (enemy_.pos - enemy.pos).normalize() * \
                         (enemy_.radius + enemy.radius)
