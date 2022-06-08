@@ -34,6 +34,7 @@ from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
 from data.constants import UI_FONT_COLOR
 from data.constants import WEAPON_BULLETS
+from data.constants import WEAPON_COOLDOWN_FRAMES
 from data.constants import WEAPON_DAMAGE
 from data.constants import WEAPON_RELOAD_FRAMES
 from data.game_object import Bullet
@@ -91,24 +92,35 @@ def get_mouse_direction() -> Vector2:
 
 
 def fire_bullet() -> None:
-    """fires a bullet in the direction of the mouse"""
-    # Calculate direction of bullet from player to mouse
-    direction = get_mouse_direction()
-    # Create new bullet object in front of player
-    obj_bullet.append(Bullet(player.pos + (direction *
-                      (PLAYER_RADIUS + BULLET_RADIUS)), direction))
+    """fires a bullet in the direction of the mouse if bullets are available"""
+    global weapon_cooldown, weapon_reload
+    # game not paused, player weapon not on cooldown or reloading, and player is alive
+    if not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
+        # subtract bullet count
+        stats["bullets"] -= 1
+        # if last bullet begin reload
+        if stats["bullets"] == 0:
+            weapon_reload = WEAPON_RELOAD_FRAMES
+        # if bullets remain, start cooldown
+        else:
+            weapon_cooldown = WEAPON_COOLDOWN_FRAMES
+        # create new bullet object in front of player
+        direction = get_mouse_direction()
+        obj_bullet.append(
+            Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
 
 
 def reset_game() -> None:
     """resets game data"""
-    global camera_offset, player, obj_bullet, obj_enemy, reload, stats
+    global camera_offset, player, obj_bullet, obj_enemy, weapon_cooldown, weapon_reload, stats
     # reset camera offset
     camera_offset = -SURFACE_CENTER
     # reset game objects
     player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
-    # reset reload time
-    reload = 0
+    # reset weapon time
+    weapon_cooldown = 0
+    weapon_reload = 0
     # reset game stats
     stats = {"bullets": WEAPON_BULLETS,
              "distance": 0.0,
@@ -143,7 +155,8 @@ camera_offset = None
 player = None
 obj_bullet = None
 obj_enemy = None
-reload = None
+weapon_cooldown = None
+weapon_reload = None
 stats = None
 # game settings
 try:
@@ -208,11 +221,7 @@ while running:
                 match event.button:
                     case 1:
                         # shoot bullet
-                        if not pause and reload == 0 and stats["bullets"] > 0 and player.is_alive():
-                            fire_bullet()
-                            stats["bullets"] -= 1
-                            if stats["bullets"] == 0:
-                                reload = WEAPON_RELOAD_FRAMES
+                        fire_bullet()
                     case 3:
                         # toggle aim line
                         settings["show_aim_line"] = not settings["show_aim_line"]
@@ -232,9 +241,12 @@ while running:
         original_pos = player.pos.copy()
         if player.is_alive():
             player.update(input)
-            if reload > 0:
-                reload -= 1
-                if reload == 0:
+            if weapon_cooldown > 0:
+                weapon_cooldown -= 1
+            elif weapon_reload > 0:
+                weapon_reload -= 1
+                if weapon_reload == 0:
+                    # reload finished
                     stats["bullets"] = WEAPON_BULLETS
         stats["distance"] += (player.pos - original_pos).length()
         # update enemies
