@@ -179,13 +179,21 @@ while running:
             case pg.QUIT:
                 # actions when window is closed
                 running = False
+            case pg.ACTIVEEVENT:
+                # pause on lost focus
+                try:
+                    if event.gain == 0 and event.state == 1:
+                        pause = True
+                except:
+                    pass
             case pg.KEYDOWN:
                 # actions for keydown events
                 match event.key:
                     case pg.K_END:
                         running = False
                     case pg.K_PAGEDOWN:
-                        pause = True
+                        if player.is_alive():
+                            pause = True
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
