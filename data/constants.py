@@ -17,6 +17,12 @@ class FontType(Enum):
     GAMEOVER = 2
 
 
+# game settings
+class Setting(Enum):
+    """game settings"""
+    SHOW_AIM_LINE = 0
+
+
 def create_font(size: int) -> Font:
     """creates a font object of specified size"""
     return Font(FONT_FILE, size)
@@ -32,6 +38,10 @@ SURFACE_SIZE = Vector2(1280, 720)
 SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
+
+# default game settings
+# TODO add more values to settings
+SETTINGS = {Setting.SHOW_AIM_LINE: True}
 
 # game values
 START_BULLETS = 10
@@ -51,8 +61,9 @@ RESTART_FONT_COLOR = Color(128, 128, 128)
 UI_FONT_COLOR = Color(192, 192, 192)
 
 # colors
+AIM_LINE_COLOR = Color(255, 255, 255)
 BULLET_COLOR = Color(0, 128, 255)
-ENEMY_COLOR = Color(255, 0, 0)
+ENEMY_COLOR = Color(64, 255, 16)
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0, 192)  # with alpha value
 PLAYER_COLOR = Color(0, 255, 255)
 

@@ -6,6 +6,7 @@ from numpy import sin
 from pygame import Surface
 from pygame.color import Color
 from pygame.math import Vector2
+from data.constants import AIM_LINE_COLOR
 from data.constants import BULLET_RADIUS
 from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
@@ -18,6 +19,8 @@ from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
+from data.constants import Setting
+from data.constants import SETTINGS
 from data.constants import START_BULLETS
 from data.constants import START_ENEMY_AMOUNT
 from data.constants import START_ENEMY_DISTANCE
@@ -78,15 +81,18 @@ def spawn_enemy(distance_scale: float = 1.0) -> None:
                      * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
+def get_mouse_direction() -> Vector2:
+    """returns a normalized vector2 in the direction of the mouse from the player"""
+    return (pg.mouse.get_pos() + camera_offset - obj_player.pos).normalize()
+
+
 def fire_bullet() -> None:
     """fires a bullet in the direction of the mouse"""
     # Calculate direction of bullet from player to mouse
-    start_pos = obj_player.pos.copy()
-    direction = (pg.mouse.get_pos() + camera_offset - start_pos).normalize()
-    # make bullet start in front of player
-    start_pos += direction * (PLAYER_RADIUS + BULLET_RADIUS)
-    # Create new bullet object
-    obj_bullet.append(Bullet(start_pos, direction))
+    direction = get_mouse_direction()
+    # Create new bullet object in front of player
+    obj_bullet.append(Bullet(obj_player.pos + (direction *
+                      (PLAYER_RADIUS + BULLET_RADIUS)), direction))
 
 
 def reset_game() -> None:
@@ -131,6 +137,9 @@ obj_player = None
 obj_bullet = None
 obj_enemy = None
 stats = None
+# game settings
+# TODO load settings from file. if file doesn't exist, use default settings
+settings = SETTINGS.copy()
 # reset game
 reset_game()
 
@@ -185,10 +194,15 @@ while running:
                     case pg.K_d:
                         input.x -= 1
             case pg.MOUSEBUTTONDOWN:
-                # shoot bullet
-                if event.button == 1 and not pause and stats["bullets"] > 0 and obj_player.is_alive():
-                    fire_bullet()
-                    stats["bullets"] -= 1
+                match event.button:
+                    case 1:
+                        # shoot bullet
+                        if not pause and stats["bullets"] > 0 and obj_player.is_alive():
+                            fire_bullet()
+                            stats["bullets"] -= 1
+                    case 3:
+                        # toggle aim line
+                        settings[Setting.SHOW_AIM_LINE] = not settings[Setting.SHOW_AIM_LINE]
         # end of event handling
 
     # check pause
@@ -249,6 +263,13 @@ while running:
                 obj.draw(surface_main, camera_offset)
         # display appropriate ui
         if obj_player.is_alive():
+            if settings[Setting.SHOW_AIM_LINE]:
+                # draw aim line
+                start_pos = obj_player.pos + \
+                    (get_mouse_direction() * (obj_player.radius * 2)) - camera_offset
+                end_pos = start_pos + get_mouse_direction() * 40
+                pg.draw.line(surface_main, AIM_LINE_COLOR,
+                             start_pos, end_pos, 2)
             # these are printed top to bottom
             ui_info = [f"pos_x: {obj_player.pos.x:.2f}",
                        f"pos_y: {obj_player.pos.y:.2f}",
@@ -275,5 +296,6 @@ while running:
     clock.tick(FPS)
     # end of game loop
 
+# TODO add settings saving code
 pg.quit()
 # end of program
