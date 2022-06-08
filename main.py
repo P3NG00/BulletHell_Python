@@ -77,13 +77,13 @@ def random_vector() -> Vector2:
 
 def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
-    obj_enemy.append(Enemy(obj_player.pos + (random_vector()
+    obj_enemy.append(Enemy(player.pos + (random_vector()
                      * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
-    return (pg.mouse.get_pos() + camera_offset - obj_player.pos).normalize()
+    return (pg.mouse.get_pos() + camera_offset - player.pos).normalize()
 
 
 def fire_bullet() -> None:
@@ -91,17 +91,17 @@ def fire_bullet() -> None:
     # Calculate direction of bullet from player to mouse
     direction = get_mouse_direction()
     # Create new bullet object in front of player
-    obj_bullet.append(Bullet(obj_player.pos + (direction *
+    obj_bullet.append(Bullet(player.pos + (direction *
                       (PLAYER_RADIUS + BULLET_RADIUS)), direction))
 
 
 def reset_game() -> None:
     """resets game data"""
-    global camera_offset, obj_player, obj_bullet, obj_enemy, stats
+    global camera_offset, player, obj_bullet, obj_enemy, stats
     # reset camera offset
     camera_offset = -SURFACE_CENTER
     # reset game objects
-    obj_player = Player(Vector2(0))
+    player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
     # reset game stats
     stats = {
@@ -133,7 +133,7 @@ surface_text_restart = create_text_surface(
     "Press SPACE to restart...", RESTART_FONT_COLOR, FontType.NORMAL)
 # game data
 camera_offset = None
-obj_player = None
+player = None
 obj_bullet = None
 obj_enemy = None
 stats = None
@@ -164,13 +164,13 @@ while running:
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
-                        if obj_player.is_alive():
+                        if player.is_alive():
                             pause = not pause
                             if pause:
                                 surface_apply_pause()
                     # restart game button
                     case pg.K_SPACE:
-                        if not obj_player.is_alive():
+                        if not player.is_alive():
                             reset_game()
                 # movement input press
                 match event.key:
@@ -197,7 +197,7 @@ while running:
                 match event.button:
                     case 1:
                         # shoot bullet
-                        if not pause and stats["bullets"] > 0 and obj_player.is_alive():
+                        if not pause and stats["bullets"] > 0 and player.is_alive():
                             fire_bullet()
                             stats["bullets"] -= 1
                     case 3:
@@ -216,11 +216,11 @@ while running:
             current_enemy_spawn_time = ENEMY_SPAWN_RATE
             spawn_enemy()
         # update player
-        if obj_player.is_alive():
-            obj_player.update(input)
+        if player.is_alive():
+            player.update(input)
         # update enemies
         for enemy in obj_enemy:
-            enemy.update(obj_player)
+            enemy.update(player)
             # test enemy collision
             for enemy_ in obj_enemy:
                 test_collision(enemy, enemy_)
@@ -241,7 +241,7 @@ while running:
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
         # move camera_offset towards player position
         camera_offset = camera_offset.lerp(
-            obj_player.pos - SURFACE_CENTER, CAMERA_SPEED)
+            player.pos - SURFACE_CENTER, CAMERA_SPEED)
 
         # Render
 
@@ -256,27 +256,27 @@ while running:
             current_pos.x = start_x
             current_pos.y += TILE_SIZE.y
         # draw game objects
-        if obj_player.is_alive():
-            obj_player.draw(surface_main, camera_offset)
+        if player.is_alive():
+            player.draw(surface_main, camera_offset)
         for obj_list in [obj_enemy, obj_bullet]:
             for obj in obj_list:
                 obj.draw(surface_main, camera_offset)
         # display appropriate ui
-        if obj_player.is_alive():
+        if player.is_alive():
             if settings[Setting.SHOW_AIM_LINE]:
                 # draw aim line
-                start_pos = obj_player.pos + \
-                    (get_mouse_direction() * (obj_player.radius * 2)) - camera_offset
+                start_pos = player.pos + \
+                    (get_mouse_direction() * (player.radius * 2)) - camera_offset
                 end_pos = start_pos + get_mouse_direction() * 40
                 pg.draw.line(surface_main, AIM_LINE_COLOR,
                              start_pos, end_pos, 2)
             # these are printed top to bottom
-            ui_info = [f"pos_x: {obj_player.pos.x:.2f}",
-                       f"pos_y: {obj_player.pos.y:.2f}",
+            ui_info = [f"pos_x: {player.pos.x:.2f}",
+                       f"pos_y: {player.pos.y:.2f}",
                        f"fps: {clock.get_fps():.2f}",
                        f"killed: {stats['killed']}",
                        f"bullets: {stats['bullets']}",
-                       f"life: {obj_player.life}"]
+                       f"life: {player.life}"]
             current_height = UI_BORDER_OFFSET
             for i in range(len(ui_info)):
                 # replace index with blit information
