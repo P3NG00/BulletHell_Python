@@ -109,11 +109,11 @@ class Enemy(GameObject):
         """moves the enemy towards the player"""
         # move towards player position
         self.direction = (player.pos - self.pos).normalize()
+        # update movement this frame
+        super().update()
         # check player collision
         if test_collision(self, player):
             player.damage()
-        # update movement this frame
-        super().update()
 
 
 def test_collision(obj_1: GameObject, obj_2: GameObject) -> bool:
