@@ -6,6 +6,7 @@ from numpy import pi
 from numpy import sin
 from pygame import Surface
 from pygame.color import Color
+from pygame.draw import line as draw_line
 from pygame.math import Vector2
 from data.constants import AIM_LINE_COLOR
 from data.constants import AIM_LINE_LENGTH
@@ -296,8 +297,8 @@ while running:
                 # draw aim line
                 start_pos = player.pos + \
                     (get_mouse_direction() * (player.radius * 2)) - camera_offset
-                pg.draw.line(surface_main, AIM_LINE_COLOR, start_pos,
-                             start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
+                draw_line(surface_main, AIM_LINE_COLOR, start_pos,
+                          start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
             # these are printed top to bottom
             ui_info = [f"pos_x: {player.pos.x:.2f}",
                        f"pos_y: {player.pos.y:.2f}",
