@@ -34,6 +34,7 @@ from data.game_object import Enemy
 from data.game_object import Player
 from data.game_object import test_collision
 
+
 """main game script"""
 
 
