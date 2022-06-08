@@ -180,12 +180,10 @@ while running:
                 # actions when window is closed
                 running = False
             case pg.ACTIVEEVENT:
-                # pause on lost focus
-                try:
-                    if event.gain == 0 and event.state == 1:
-                        pause = True
-                except:
-                    pass
+                # needed because first active event sent doesnt contain gain and state data
+                if hasattr(event, "gain") and event.gain == 0 and event.state == 1:
+                    # pause on lost focus
+                    pause = True
             case pg.KEYDOWN:
                 # actions for keydown events
                 match event.key:
