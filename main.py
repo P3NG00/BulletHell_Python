@@ -8,6 +8,7 @@ from pygame import Surface
 from pygame.color import Color
 from pygame.math import Vector2
 from data.constants import AIM_LINE_COLOR
+from data.constants import AIM_LINE_LENGTH
 from data.constants import BULLET_RADIUS
 from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
@@ -273,7 +274,7 @@ while running:
                 # draw aim line
                 start_pos = player.pos + \
                     (get_mouse_direction() * (player.radius * 2)) - camera_offset
-                end_pos = start_pos + get_mouse_direction() * 40
+                end_pos = start_pos + get_mouse_direction() * AIM_LINE_LENGTH
                 pg.draw.line(surface_main, AIM_LINE_COLOR,
                              start_pos, end_pos, 2)
             # these are printed top to bottom

@@ -71,6 +71,7 @@ CAMERA_SPEED = 0.035
 
 # ui
 UI_BORDER_OFFSET = 15
+AIM_LINE_LENGTH = 40
 
 # player
 PLAYER_I_FRAMES = seconds_to_frames(3)
