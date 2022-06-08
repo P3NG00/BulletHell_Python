@@ -274,9 +274,8 @@ while running:
                 # draw aim line
                 start_pos = player.pos + \
                     (get_mouse_direction() * (player.radius * 2)) - camera_offset
-                end_pos = start_pos + get_mouse_direction() * AIM_LINE_LENGTH
-                pg.draw.line(surface_main, AIM_LINE_COLOR,
-                             start_pos, end_pos, 2)
+                pg.draw.line(surface_main, AIM_LINE_COLOR, start_pos,
+                             start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
             # these are printed top to bottom
             ui_info = [f"pos_x: {player.pos.x:.2f}",
                        f"pos_y: {player.pos.y:.2f}",
