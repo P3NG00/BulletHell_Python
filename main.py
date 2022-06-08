@@ -97,8 +97,9 @@ def fire_bullet() -> None:
     global weapon_cooldown, weapon_reload
     # game not paused, player weapon not on cooldown or reloading, and player is alive
     if not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
-        # subtract bullet count
+        # update stats
         stats["bullets"] -= 1
+        stats["shots"] += 1
         # if last bullet begin reload
         if stats["bullets"] == 0:
             weapon_reload = WEAPON_RELOAD_FRAMES
@@ -305,7 +306,7 @@ while running:
                        f"fps: {clock.get_fps():.2f}",
                        f"distance: {stats['distance']:.2f}",
                        f"bullets: {stats['bullets']}",
-                       f"shots: {stats['shots']:.2f}",
+                       f"shots: {stats['shots']}",
                        f"hits: {stats['hits']}",
                        f"life: {player.life}"]
             current_height = UI_BORDER_OFFSET
