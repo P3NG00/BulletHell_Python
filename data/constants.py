@@ -17,12 +17,6 @@ class FontType(Enum):
     GAMEOVER = 2
 
 
-# game settings
-class Setting(Enum):
-    """game settings"""
-    SHOW_AIM_LINE = 0
-
-
 def create_font(size: int) -> Font:
     """creates a font object of specified size"""
     return Font(FONT_FILE, size)
@@ -40,8 +34,8 @@ TITLE = "Python Game"
 FPS = 65.0
 
 # default game settings
-# TODO add more values to settings
-SETTINGS = {Setting.SHOW_AIM_LINE: True}
+SETTINGS_FILE = "data/settings.json"
+SETTINGS_DEFAULT = {"show_aim_line": True}
 
 # game values
 START_BULLETS = 10

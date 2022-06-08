@@ -1,5 +1,6 @@
 import random
 import pygame as pg
+import json
 from numpy import cos
 from numpy import pi
 from numpy import sin
@@ -19,8 +20,8 @@ from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
-from data.constants import Setting
-from data.constants import SETTINGS
+from data.constants import SETTINGS_DEFAULT
+from data.constants import SETTINGS_FILE
 from data.constants import START_BULLETS
 from data.constants import START_ENEMY_AMOUNT
 from data.constants import START_ENEMY_DISTANCE
@@ -138,8 +139,11 @@ obj_bullet = None
 obj_enemy = None
 stats = None
 # game settings
-# TODO load settings from file. if file doesn't exist, use default settings
-settings = SETTINGS.copy()
+try:
+    with open(SETTINGS_FILE) as file:
+        settings = json.load(file)
+except:
+    settings = SETTINGS_DEFAULT.copy()
 # reset game
 reset_game()
 
@@ -202,7 +206,7 @@ while running:
                             stats["bullets"] -= 1
                     case 3:
                         # toggle aim line
-                        settings[Setting.SHOW_AIM_LINE] = not settings[Setting.SHOW_AIM_LINE]
+                        settings["show_aim_line"] = not settings["show_aim_line"]
         # end of event handling
 
     # check pause
@@ -263,7 +267,7 @@ while running:
                 obj.draw(surface_main, camera_offset)
         # display appropriate ui
         if player.is_alive():
-            if settings[Setting.SHOW_AIM_LINE]:
+            if settings["show_aim_line"]:
                 # draw aim line
                 start_pos = player.pos + \
                     (get_mouse_direction() * (player.radius * 2)) - camera_offset
@@ -296,6 +300,9 @@ while running:
     clock.tick(FPS)
     # end of game loop
 
-# TODO add settings saving code
+# save settings
+with open(SETTINGS_FILE, "w") as file:
+    json.dump(settings, file, indent=4)
+# close pygame
 pg.quit()
 # end of program
