@@ -23,7 +23,6 @@ from data.constants import PLAYER_RADIUS
 from data.constants import RESTART_FONT_COLOR
 from data.constants import SETTINGS_DEFAULT
 from data.constants import SETTINGS_FILE
-from data.constants import START_BULLETS
 from data.constants import START_ENEMY_AMOUNT
 from data.constants import START_ENEMY_DISTANCE
 from data.constants import START_ENEMY_INCREMENT
@@ -34,6 +33,9 @@ from data.constants import TILE_SIZE
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
 from data.constants import UI_FONT_COLOR
+from data.constants import WEAPON_BULLETS
+from data.constants import WEAPON_DAMAGE
+from data.constants import WEAPON_RELOAD_FRAMES
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
@@ -99,16 +101,19 @@ def fire_bullet() -> None:
 
 def reset_game() -> None:
     """resets game data"""
-    global camera_offset, player, obj_bullet, obj_enemy, stats
+    global camera_offset, player, obj_bullet, obj_enemy, reload, stats
     # reset camera offset
     camera_offset = -SURFACE_CENTER
     # reset game objects
     player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
+    # reset reload time
+    reload = 0
     # reset game stats
-    stats = {"bullets": START_BULLETS,
+    stats = {"bullets": WEAPON_BULLETS,
              "distance": 0.0,
-             "killed": 0}
+             "hits": 0,
+             "shots": 0}
     # spawn enemies shorter than regular spawn distance
     for i in range(START_ENEMY_AMOUNT):
         spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
@@ -138,6 +143,7 @@ camera_offset = None
 player = None
 obj_bullet = None
 obj_enemy = None
+reload = None
 stats = None
 # game settings
 try:
@@ -202,9 +208,11 @@ while running:
                 match event.button:
                     case 1:
                         # shoot bullet
-                        if not pause and stats["bullets"] > 0 and player.is_alive():
+                        if not pause and reload == 0 and stats["bullets"] > 0 and player.is_alive():
                             fire_bullet()
                             stats["bullets"] -= 1
+                            if stats["bullets"] == 0:
+                                reload = WEAPON_RELOAD_FRAMES
                     case 3:
                         # toggle aim line
                         settings["show_aim_line"] = not settings["show_aim_line"]
@@ -224,6 +232,10 @@ while running:
         original_pos = player.pos.copy()
         if player.is_alive():
             player.update(input)
+            if reload > 0:
+                reload -= 1
+                if reload == 0:
+                    stats["bullets"] = WEAPON_BULLETS
         stats["distance"] += (player.pos - original_pos).length()
         # update enemies
         for enemy in obj_enemy:
@@ -239,10 +251,8 @@ while running:
                 # if bullet hits enemy
                 if bullet.is_touching(enemy):
                     bullet.life = 0
-                    enemy.life -= 1
-                    # increment bullet and kill count
-                    for stat in ["bullets", "killed"]:
-                        stats[stat] += 1
+                    enemy.life -= WEAPON_DAMAGE
+                    stats["hits"] += 1
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
@@ -281,8 +291,9 @@ while running:
                        f"pos_y: {player.pos.y:.2f}",
                        f"fps: {clock.get_fps():.2f}",
                        f"distance: {stats['distance']:.2f}",
-                       f"killed: {stats['killed']}",
                        f"bullets: {stats['bullets']}",
+                       f"shots: {stats['shots']:.2f}",
+                       f"hits: {stats['hits']}",
                        f"life: {player.life}"]
             current_height = UI_BORDER_OFFSET
             for i in range(len(ui_info)):

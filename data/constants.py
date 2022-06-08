@@ -38,10 +38,14 @@ SETTINGS_FILE = "data/settings.json"
 SETTINGS_DEFAULT = {"show_aim_line": True}
 
 # game values
-START_BULLETS = 10
 START_ENEMY_AMOUNT = 3
 START_ENEMY_DISTANCE = 0.55
 START_ENEMY_INCREMENT = 0.1
+
+# weapon
+WEAPON_BULLETS = 10
+WEAPON_DAMAGE = 1
+WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # fonts
 pg.font.init()
