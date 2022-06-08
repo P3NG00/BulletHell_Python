@@ -105,9 +105,9 @@ def reset_game() -> None:
     player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
     # reset game stats
-    stats = {
-        "bullets": START_BULLETS,
-        "killed": 0}
+    stats = {"bullets": START_BULLETS,
+             "distance": 0.0,
+             "killed": 0}
     # spawn enemies shorter than regular spawn distance
     for i in range(START_ENEMY_AMOUNT):
         spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
@@ -220,8 +220,10 @@ while running:
             current_enemy_spawn_time = ENEMY_SPAWN_RATE
             spawn_enemy()
         # update player
+        original_pos = player.pos.copy()
         if player.is_alive():
             player.update(input)
+        stats["distance"] += (player.pos - original_pos).length()
         # update enemies
         for enemy in obj_enemy:
             enemy.update(player)
@@ -278,6 +280,7 @@ while running:
             ui_info = [f"pos_x: {player.pos.x:.2f}",
                        f"pos_y: {player.pos.y:.2f}",
                        f"fps: {clock.get_fps():.2f}",
+                       f"distance: {stats['distance']:.2f}",
                        f"killed: {stats['killed']}",
                        f"bullets: {stats['bullets']}",
                        f"life: {player.life}"]
