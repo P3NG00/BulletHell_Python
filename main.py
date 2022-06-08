@@ -186,14 +186,11 @@ while running:
                         running = False
                     case pg.K_PAGEDOWN:
                         pause = True
-                        surface_apply_pause()
                         pg.display.iconify()
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         if player.is_alive():
                             pause = not pause
-                            if pause:
-                                surface_apply_pause()
                     # restart game button
                     case pg.K_SPACE:
                         if not player.is_alive():
@@ -226,7 +223,8 @@ while running:
                         fire_bullet()
                     case 3:
                         # toggle aim line
-                        settings["show_aim_line"] = not settings["show_aim_line"]
+                        if not pause:
+                            settings["show_aim_line"] = not settings["show_aim_line"]
         # end of event handling
 
     # check pause
@@ -274,53 +272,56 @@ while running:
         camera_offset = camera_offset.lerp(
             player.pos - SURFACE_CENTER, CAMERA_SPEED)
 
-        # Render
+    # Render
 
-        # blit background tiles
-        start_x = (-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x
-        current_pos = Vector2(start_x, (-camera_offset.y %
-                              TILE_SIZE.y) - TILE_SIZE.y)
-        while current_pos.y < SURFACE_SIZE.y:
-            while current_pos.x < SURFACE_SIZE.x:
-                surface_main.blit(TILE, current_pos)
-                current_pos.x += TILE_SIZE.x
-            current_pos.x = start_x
-            current_pos.y += TILE_SIZE.y
-        # draw game objects
-        if player.is_alive():
-            player.draw(surface_main, camera_offset)
-        for obj_list in [obj_enemy, obj_bullet]:
-            for obj in obj_list:
-                obj.draw(surface_main, camera_offset)
-        # display appropriate ui
-        if player.is_alive():
-            if settings["show_aim_line"]:
-                # draw aim line
-                start_pos = player.pos + \
-                    (get_mouse_direction() * (player.radius * 2)) - camera_offset
-                draw_line(surface_main, AIM_LINE_COLOR, start_pos,
-                          start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
-            # these are printed top to bottom
-            ui_info = [f"pos_x: {player.pos.x:.2f}",
-                       f"pos_y: {player.pos.y:.2f}",
-                       f"fps: {clock.get_fps():.2f}",
-                       f"distance: {stats['distance']:.2f}",
-                       f"bullets: {stats['bullets']}",
-                       f"shots: {stats['shots']}",
-                       f"hits: {stats['hits']}",
-                       f"life: {player.life}"]
-            current_height = UI_BORDER_OFFSET
-            for i in range(len(ui_info)):
-                # replace index with blit information
-                ui_info[i] = (create_text_surface(
-                    ui_info[i], UI_FONT_COLOR, FontType.UI), (UI_BORDER_OFFSET + 5, current_height))
-                # move downwards from last height
-                current_height += ui_info[i][0].get_height()
-            # blit surfaces
-            surface_main.blits(ui_info)
-        else:
-            surface_apply_game_over()
-        # end of game update
+    # blit background tiles
+    start_x = (-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x
+    current_pos = Vector2(start_x, (-camera_offset.y %
+                          TILE_SIZE.y) - TILE_SIZE.y)
+    while current_pos.y < SURFACE_SIZE.y:
+        while current_pos.x < SURFACE_SIZE.x:
+            surface_main.blit(TILE, current_pos)
+            current_pos.x += TILE_SIZE.x
+        current_pos.x = start_x
+        current_pos.y += TILE_SIZE.y
+    # draw game objects
+    if player.is_alive():
+        player.draw(surface_main, camera_offset)
+    for obj_list in [obj_enemy, obj_bullet]:
+        for obj in obj_list:
+            obj.draw(surface_main, camera_offset)
+    # display appropriate ui
+    if player.is_alive():
+        if not pause and settings["show_aim_line"]:
+            # draw aim line
+            start_pos = player.pos + \
+                (get_mouse_direction() * (player.radius * 2)) - camera_offset
+            draw_line(surface_main, AIM_LINE_COLOR, start_pos,
+                      start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
+        # these are printed top to bottom
+        ui_info = [f"pos_x: {player.pos.x:.2f}",
+                   f"pos_y: {player.pos.y:.2f}",
+                   f"fps: {clock.get_fps():.2f}",
+                   f"distance: {stats['distance']:.2f}",
+                   f"bullets: {stats['bullets']}",
+                   f"shots: {stats['shots']}",
+                   f"hits: {stats['hits']}",
+                   f"life: {player.life}"]
+        current_height = UI_BORDER_OFFSET
+        for i in range(len(ui_info)):
+            # replace index with blit information
+            ui_info[i] = (create_text_surface(
+                ui_info[i], UI_FONT_COLOR, FontType.UI), (UI_BORDER_OFFSET + 5, current_height))
+            # move downwards from last height
+            current_height += ui_info[i][0].get_height()
+        # blit surfaces
+        surface_main.blits(ui_info)
+        # if paused overlay fade
+        if pause:
+            surface_apply_pause()
+    else:
+        surface_apply_game_over()
+    # end of game update
 
     # display surface
     pg.display.flip()
