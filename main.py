@@ -89,8 +89,8 @@ def random_vector() -> Vector2:
 
 def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
-    obj_enemy.append(Enemy(player.pos + (random_vector()
-                     * ENEMY_SPAWN_DISTANCE * distance_scale)))
+    obj_enemy.append(Enemy(player.pos + (random_vector() *
+                     ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 
 def get_mouse_direction() -> Vector2:
@@ -171,7 +171,7 @@ try:
     with open(SETTINGS_FILE) as file:
         settings = json.load(file)
 except:
-    settings = SETTINGS_DEFAULT.copy()
+    settings = SETTINGS_DEFAULT
 # reset game
 reset_game()
 

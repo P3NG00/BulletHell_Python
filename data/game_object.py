@@ -43,10 +43,10 @@ class GameObject(ABC):
 
     def draw(self, surface: Surface, camera_offset: Vector2) -> None:
         """draws the object to the surface"""
-        draw_circle(surface, self.color, self.pos -
-                    camera_offset, self.radius)
+        draw_circle(surface, self.color, self.pos - camera_offset, self.radius)
 
     def is_touching(self, other: 'GameObject') -> bool:
+        """returns if this gameobject is touching the other gameobject"""
         return (self.pos - other.pos).magnitude() < self.radius + other.radius
 
 
