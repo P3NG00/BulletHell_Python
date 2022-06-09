@@ -1,6 +1,6 @@
-import pygame as pg
 from enum import Enum
 from pygame.font import Font
+from pygame.font import init as init_font
 from pygame.image import load as load_image
 from pygame import Color
 from pygame import Vector2
@@ -50,7 +50,7 @@ WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # fonts
-pg.font.init()
+init_font()
 FONT_FILE = "data/upheavtt.ttf"
 FONTS = {FontType.NORMAL: create_font(24),
          FontType.UI: create_font(16),

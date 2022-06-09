@@ -6,8 +6,14 @@ from numpy import pi
 from numpy import sin
 from pygame import Surface
 from pygame.color import Color
+from pygame.display import flip as update_window
+from pygame.display import iconify as minimize_window
+from pygame.display import set_caption as set_window_title
+from pygame.display import set_mode as create_window
 from pygame.draw import line as draw_line
 from pygame.math import Vector2
+from pygame.mouse import get_pos as get_mouse_pos
+from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
 from data.constants import AIM_LINE_LENGTH
 from data.constants import BULLET_RADIUS
@@ -89,7 +95,7 @@ def spawn_enemy(distance_scale: float = 1.0) -> None:
 
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
-    return (pg.mouse.get_pos() + camera_offset - player.pos).normalize()
+    return (get_mouse_pos() + camera_offset - player.pos).normalize()
 
 
 def fire_bullet() -> None:
@@ -134,15 +140,15 @@ def reset_game() -> None:
 
 
 # initialize pygame
-pg.display.set_caption(TITLE)
+set_window_title(TITLE)
 # program info
-clock = pg.time.Clock()
+clock = Clock()
 input = Vector2(0)
 pause = False
 running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
 # create surfaces
-surface_main = pg.display.set_mode(SURFACE_SIZE)
+surface_main = create_window(SURFACE_SIZE)
 surface_fade = Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
@@ -180,7 +186,7 @@ while running:
                 # actions when window is closed
                 running = False
             case pg.ACTIVEEVENT:
-                # needed because first active event sent doesnt contain gain and state data
+                # hasattr needed because first active event sent doesnt contain gain and state data
                 if hasattr(event, "gain") and event.gain == 0 and event.state == 1:
                     # pause on lost focus
                     pause = True
@@ -192,7 +198,7 @@ while running:
                     case pg.K_PAGEDOWN:
                         if player.is_alive():
                             pause = True
-                        pg.display.iconify()
+                        minimize_window()
                     # handle pause toggling
                     case pg.K_ESCAPE:
                         if player.is_alive():
@@ -330,7 +336,7 @@ while running:
     # end of game update
 
     # display surface
-    pg.display.flip()
+    update_window()
     # fps lock
     clock.tick(FPS)
     # end of game loop
