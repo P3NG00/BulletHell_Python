@@ -12,6 +12,7 @@ from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
 from .constants import ENEMY_SPEED
+from .constants import ENEMY_TRACKING
 from .constants import FPS
 from .constants import PLAYER_COLOR
 from .constants import PLAYER_I_FRAMES
@@ -108,7 +109,8 @@ class Enemy(GameObject):
     def update(self, player: Player) -> None:
         """moves the enemy towards the player"""
         # move towards player position
-        self.direction = (player.pos - self.pos).normalize()
+        self.direction = self.direction.lerp(
+            (player.pos - self.pos).normalize(), ENEMY_TRACKING)
         # update movement this frame
         super().update()
         # check player collision
