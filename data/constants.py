@@ -91,7 +91,7 @@ BULLET_RADIUS = 4.0
 BULLET_SPEED = 450.0
 
 # enemy
-ENEMY_LIFE = 1  # in hits before death
+ENEMY_LIFE = 3  # in hits before death
 ENEMY_RADIUS = 16.0
 ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude()
 ENEMY_SPAWN_RATE = seconds_to_frames(1.25)

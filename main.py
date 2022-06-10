@@ -133,6 +133,7 @@ def reset_game() -> None:
     stats = {"bullets": WEAPON_BULLETS,
              "distance": 0.0,
              "hits": 0,
+             "kills": 0,
              "shots": 0}
     # spawn enemies shorter than regular spawn distance
     for i in range(START_ENEMY_AMOUNT):
@@ -279,7 +280,10 @@ while running:
                     stats["hits"] += 1
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
+        enemies = len(obj_enemy)
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
+        # increment kill for each dead enemy
+        stats["kills"] += enemies - len(obj_enemy)
         # move camera_offset towards player position
         camera_offset = camera_offset.lerp(
             player.pos - SURFACE_CENTER, CAMERA_SPEED)
@@ -318,6 +322,7 @@ while running:
                    f"bullets: {stats['bullets']}",
                    f"shots: {stats['shots']}",
                    f"hits: {stats['hits']}",
+                   f"kills: {stats['kills']}",
                    f"life: {player.life}"]
         current_height = UI_BORDER_OFFSET
         for i in range(len(ui_info)):
