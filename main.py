@@ -139,7 +139,7 @@ def reset_game() -> None:
         spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
 
 
-# initialize pygame
+# begin main script
 set_window_title(TITLE)
 # program info
 clock = Clock()
