@@ -73,7 +73,7 @@ TILE_SIZE = Vector2(TILE.get_size())
 TILE_CENTER = TILE_SIZE / 2
 
 # camera
-CAMERA_SPEED = 0.035
+CAMERA_SPEED = 3 / FPS  # divide by FPS for framerate independence
 
 # ui
 UI_BORDER_OFFSET = 15
