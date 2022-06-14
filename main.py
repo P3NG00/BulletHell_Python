@@ -194,8 +194,10 @@ while running:
             case pg.KEYDOWN:
                 # actions for keydown events
                 match event.key:
+                    # close application
                     case pg.K_END:
                         running = False
+                    # minimize game
                     case pg.K_PAGEDOWN:
                         if player.is_alive():
                             pause = True
@@ -348,7 +350,7 @@ while running:
 
 # save settings
 with open(SETTINGS_FILE, "w") as file:
-    json.dump(settings, file, indent=4)
+    json.dump(settings, file, indent=2)
 # close pygame
 pg.quit()
 # end of program
