@@ -1,4 +1,7 @@
+import pygame
 from pygame import Color
+from pygame import gfxdraw
+from pygame import Surface
 from pygame import Vector2
 
 """ constant game values """
@@ -12,6 +15,19 @@ SURFACE_SIZE = Vector2(1280, 720)
 SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
+ANTI_ALIASING = False
+
+# draw functions
+def aa_circle(surface: Surface, color: Color, center: Vector2, radius: float) -> None:
+    """draws a circle with anti-aliasing"""
+    radius = int(radius)
+    x = int(center.x)
+    y = int(center.y)
+    gfxdraw.aacircle(surface, x, y, radius, color)
+    gfxdraw.filled_circle(surface, x, y, radius, color)
+
+DRAW_LINE = pygame.draw.aaline if ANTI_ALIASING else pygame.draw.line
+DRAW_CIRCLE = aa_circle if ANTI_ALIASING else pygame.draw.circle
 
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)

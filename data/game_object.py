@@ -1,6 +1,5 @@
 from pygame import Color
 from pygame import Surface
-from pygame.draw import circle as draw_circle
 from pygame.math import Vector2
 from abc import ABC
 from abc import abstractmethod
@@ -8,6 +7,7 @@ from .constants import BULLET_COLOR
 from .constants import BULLET_LIFE
 from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
+from .constants import DRAW_CIRCLE
 from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
@@ -25,7 +25,7 @@ class GameObject(ABC):
     """in-game objects"""
 
     @abstractmethod
-    def __init__(self, pos: Vector2, radius: float, speed: float, color: Color, life: float = None):
+    def __init__(self, pos: Vector2, radius: int, speed: float, color: Color, life: float = None):
         self.pos = pos
         self.radius = radius
         self.speed = speed
@@ -43,7 +43,7 @@ class GameObject(ABC):
 
     def draw(self, surface: Surface, camera_offset: Vector2) -> None:
         """draws the object to the surface"""
-        draw_circle(surface, self.color, self.pos - camera_offset, self.radius)
+        DRAW_CIRCLE(surface, self.color, self.pos - camera_offset, self.radius)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""

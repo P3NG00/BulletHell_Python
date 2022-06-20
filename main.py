@@ -11,14 +11,15 @@ from pygame.display import flip as update_window
 from pygame.display import iconify as minimize_window
 from pygame.display import set_caption as set_window_title
 from pygame.display import set_mode as create_window
-from pygame.draw import line as draw_line
 from pygame.font import Font
 from pygame.image import load as load_image
 from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
+from data.constants import ANTI_ALIASING
 from data.constants import BULLET_RADIUS
+from data.constants import DRAW_LINE
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
@@ -57,9 +58,21 @@ PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
 UI_FONT_COLOR = Color(192, 192, 192)
 
+# surfaces
 def create_text_surface(text: str, color: Color, font_type: FontType) -> Surface:
     """returns a surface with colored text"""
-    return FONTS[font_type].render(text, False, color)
+    return FONTS[font_type].render(text, ANTI_ALIASING, color)
+
+surface_main = create_window(SURFACE_SIZE)
+surface_fade = Surface(SURFACE_SIZE)
+surface_fade.fill(PAUSE_OVERLAY_COLOR)
+surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
+surface_text_pause = create_text_surface(
+    "Paused", PAUSE_FONT_COLOR, FontType.NORMAL)
+surface_text_gameover = create_text_surface(
+    "GAME OVER", GAMEOVER_FONT_COLOR, FontType.GAMEOVER)
+surface_text_restart = create_text_surface(
+    "Press SPACE to restart...", RESTART_FONT_COLOR, FontType.NORMAL)
 
 def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
@@ -152,7 +165,7 @@ WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # tile
-TILE = load_image("data/tile.png")
+TILE = load_image("data/tile.png").convert()
 TILE_SIZE = Vector2(TILE.get_size())
 TILE_CENTER = TILE_SIZE / 2
 
@@ -172,17 +185,6 @@ input = Vector2(0)
 pause = False
 running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
-# create surfaces
-surface_main = create_window(SURFACE_SIZE)
-surface_fade = Surface(SURFACE_SIZE)
-surface_fade.fill(PAUSE_OVERLAY_COLOR)
-surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
-surface_text_pause = create_text_surface(
-    "Paused", PAUSE_FONT_COLOR, FontType.NORMAL)
-surface_text_gameover = create_text_surface(
-    "GAME OVER", GAMEOVER_FONT_COLOR, FontType.GAMEOVER)
-surface_text_restart = create_text_surface(
-    "Press SPACE to restart...", RESTART_FONT_COLOR, FontType.NORMAL)
 # game data
 camera_offset = None
 player = None
@@ -338,8 +340,8 @@ while running:
             # draw aim line
             start_pos = player.pos + \
                 (get_mouse_direction() * (player.radius * 2)) - camera_offset
-            draw_line(surface_main, AIM_LINE_COLOR, start_pos,
-                      start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
+            DRAW_LINE(surface_main, AIM_LINE_COLOR, start_pos,
+                start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
         # these are printed top to bottom
         ui_info = [f"pos_x: {player.pos.x:.2f}",
                    f"pos_y: {player.pos.y:.2f}",
