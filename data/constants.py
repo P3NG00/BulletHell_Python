@@ -15,19 +15,24 @@ SURFACE_SIZE = Vector2(1280, 720)
 SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
-ANTI_ALIASING = False
 
 # draw functions
-def aa_circle(surface: Surface, color: Color, center: Vector2, radius: float) -> None:
-    """draws a circle with anti-aliasing"""
-    radius = int(radius)
-    x = int(center.x)
-    y = int(center.y)
-    gfxdraw.aacircle(surface, x, y, radius, color)
-    gfxdraw.filled_circle(surface, x, y, radius, color)
-
-DRAW_LINE = pygame.draw.aaline if ANTI_ALIASING else pygame.draw.line
-DRAW_CIRCLE = aa_circle if ANTI_ALIASING else pygame.draw.circle
+def draw_circle(surface: Surface, color: Color, center: Vector2, radius: float, anti_aliasing: bool) -> None:
+    """draws a circle"""
+    if anti_aliasing:
+        radius, x, y = int(radius), int(center.x), int(center.y)
+        gfxdraw.aacircle(surface, x, y, radius, color)
+        gfxdraw.filled_circle(surface, x, y, radius, color)
+    else:
+        pygame.draw.circle(surface, color, center, radius)
+    
+def draw_line(surface: Surface, color: Color, start: Vector2, end: Vector2, width: float, anti_aliasing: bool) -> None:
+    """draws a line"""
+    if anti_aliasing:
+        # TODO https://stackoverflow.com/questions/30578068/pygame-draw-anti-aliased-thick-line
+        pygame.draw.aaline(surface, color, start, end)
+    else:
+        pygame.draw.line(surface, color, start, end, width)
 
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)

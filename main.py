@@ -17,9 +17,8 @@ from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
-from data.constants import ANTI_ALIASING
 from data.constants import BULLET_RADIUS
-from data.constants import DRAW_LINE
+from data.constants import draw_line
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
@@ -37,7 +36,16 @@ from data.game_object import test_collision
 """main game script"""
 
 pg.init()
-
+# default game settings
+SETTINGS_FILE = "data/settings.json"
+SETTINGS_DEFAULT = {"anti-aliasing": False,
+                    "show_aim_line": True}
+# game settings
+try:
+    with open(SETTINGS_FILE) as file:
+        settings = json.load(file)
+except:
+    settings = SETTINGS_DEFAULT
 # fonts
 class FontType(Enum):
     """font types"""
@@ -61,7 +69,7 @@ UI_FONT_COLOR = Color(192, 192, 192)
 # surfaces
 def create_text_surface(text: str, color: Color, font_type: FontType) -> Surface:
     """returns a surface with colored text"""
-    return FONTS[font_type].render(text, ANTI_ALIASING, color)
+    return FONTS[font_type].render(text, settings["anti-aliasing"], color)
 
 surface_main = create_window(SURFACE_SIZE)
 surface_fade = Surface(SURFACE_SIZE)
@@ -148,10 +156,6 @@ def reset_game() -> None:
     for i in range(START_ENEMY_AMOUNT):
         spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
 
-# default game settings
-SETTINGS_FILE = "data/settings.json"
-SETTINGS_DEFAULT = {"show_aim_line": True}
-
 # game values
 START_ENEMY_AMOUNT = 3
 START_ENEMY_DISTANCE = 0.55
@@ -193,12 +197,6 @@ obj_enemy = None
 weapon_cooldown = None
 weapon_reload = None
 stats = None
-# game settings
-try:
-    with open(SETTINGS_FILE) as file:
-        settings = json.load(file)
-except:
-    settings = SETTINGS_DEFAULT
 # reset game
 reset_game()
 
@@ -236,6 +234,9 @@ while running:
                     case pg.K_SPACE:
                         if not player.is_alive():
                             reset_game()
+                    # toggle anti-aliasing
+                    case pg.K_F12:
+                        settings["anti-aliasing"] = not settings["anti-aliasing"]
                 # movement input press
                 match event.key:
                     case pg.K_w:
@@ -330,18 +331,18 @@ while running:
         current_pos.y += TILE_SIZE.y
     # draw game objects
     if player.is_alive():
-        player.draw(surface_main, camera_offset)
+        player.draw(surface_main, camera_offset, settings["anti-aliasing"])
     for obj_list in [obj_enemy, obj_bullet]:
         for obj in obj_list:
-            obj.draw(surface_main, camera_offset)
+            obj.draw(surface_main, camera_offset, settings["anti-aliasing"])
     # display appropriate ui
     if player.is_alive():
         if not pause and settings["show_aim_line"]:
             # draw aim line
             start_pos = player.pos + \
                 (get_mouse_direction() * (player.radius * 2)) - camera_offset
-            DRAW_LINE(surface_main, AIM_LINE_COLOR, start_pos,
-                start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2)
+            draw_line(surface_main, AIM_LINE_COLOR, start_pos,
+                start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2, settings["anti-aliasing"])
         # these are printed top to bottom
         ui_info = [f"pos_x: {player.pos.x:.2f}",
                    f"pos_y: {player.pos.y:.2f}",

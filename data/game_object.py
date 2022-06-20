@@ -7,7 +7,7 @@ from .constants import BULLET_COLOR
 from .constants import BULLET_LIFE
 from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
-from .constants import DRAW_CIRCLE
+from .constants import draw_circle
 from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
@@ -41,9 +41,9 @@ class GameObject(ABC):
         """moves the game object with its direction"""
         self.pos += (self.direction * self.speed) / FPS
 
-    def draw(self, surface: Surface, camera_offset: Vector2) -> None:
+    def draw(self, surface: Surface, camera_offset: Vector2, anti_aliasing: bool) -> None:
         """draws the object to the surface"""
-        DRAW_CIRCLE(surface, self.color, self.pos - camera_offset, self.radius)
+        draw_circle(surface, self.color, self.pos - camera_offset, self.radius, anti_aliasing)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
@@ -78,10 +78,10 @@ class Player(GameObject):
         # update movement this frame
         super().update()
 
-    def draw(self, surface: Surface, camera_offset: Vector2) -> None:
+    def draw(self, surface: Surface, camera_offset: Vector2, anti_aliasing: bool) -> None:
         """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
-            super().draw(surface, camera_offset)
+            super().draw(surface, camera_offset, anti_aliasing)
 
 class Bullet(GameObject):
     """bullet game object"""
