@@ -22,6 +22,7 @@ from data.constants import draw_line
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
+from data.constants import make_framerate_independent
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import seconds_to_frames
@@ -174,7 +175,7 @@ TILE_SIZE = Vector2(TILE.get_size())
 TILE_CENTER = TILE_SIZE / 2
 
 # camera
-CAMERA_SPEED = 3 / FPS  # divide by FPS for framerate independence
+CAMERA_SPEED = make_framerate_independent(3)
 
 # ui
 UI_BORDER_OFFSET = 15

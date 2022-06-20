@@ -13,7 +13,7 @@ from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
 from .constants import ENEMY_SPEED
 from .constants import ENEMY_TRACKING
-from .constants import FPS
+from .constants import make_framerate_independent
 from .constants import PLAYER_COLOR
 from .constants import PLAYER_I_FRAMES
 from .constants import PLAYER_LIFE
@@ -39,7 +39,7 @@ class GameObject(ABC):
 
     def update(self) -> None:
         """moves the game object with its direction"""
-        self.pos += (self.direction * self.speed) / FPS
+        self.pos += make_framerate_independent(self.direction * self.speed)
 
     def draw(self, surface: Surface, camera_offset: Vector2, anti_aliasing: bool) -> None:
         """draws the object to the surface"""

@@ -10,6 +10,10 @@ def seconds_to_frames(seconds: float) -> int:
     """returns the amount of frames in the given amount of seconds"""
     return int(FPS * seconds)
 
+def make_framerate_independent(value: float) -> float:
+    """returns the value in frames per second"""
+    return value / FPS
+
 # window properties
 SURFACE_SIZE = Vector2(1280, 720)
 SURFACE_CENTER = SURFACE_SIZE / 2
@@ -25,7 +29,7 @@ def draw_circle(surface: Surface, color: Color, center: Vector2, radius: float, 
         gfxdraw.filled_circle(surface, x, y, radius, color)
     else:
         pygame.draw.circle(surface, color, center, radius)
-    
+
 def draw_line(surface: Surface, color: Color, start: Vector2, end: Vector2, width: float, anti_aliasing: bool) -> None:
     """draws a line"""
     if anti_aliasing:
@@ -58,4 +62,4 @@ ENEMY_RADIUS = 16.0
 ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude()
 ENEMY_SPAWN_RATE = seconds_to_frames(1.25)
 ENEMY_SPEED = 150.0
-ENEMY_TRACKING = 0.04
+ENEMY_TRACKING = make_framerate_independent(0.5)
