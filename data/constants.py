@@ -1,31 +1,11 @@
-from enum import Enum
-from pygame.font import Font
-from pygame.font import init as init_font
-from pygame.image import load as load_image
 from pygame import Color
 from pygame import Vector2
 
-
 """ constant game values """
-
-
-# font types
-class FontType(Enum):
-    """font types"""
-    NORMAL = 0
-    UI = 1
-    GAMEOVER = 2
-
-
-def create_font(size: int) -> Font:
-    """creates a font object of specified size"""
-    return Font(FONT_FILE, size)
-
 
 def seconds_to_frames(seconds: float) -> int:
     """returns the amount of frames in the given amount of seconds"""
     return int(FPS * seconds)
-
 
 # window properties
 SURFACE_SIZE = Vector2(1280, 720)
@@ -33,51 +13,12 @@ SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
 
-# default game settings
-SETTINGS_FILE = "data/settings.json"
-SETTINGS_DEFAULT = {"show_aim_line": True}
-
-# game values
-START_ENEMY_AMOUNT = 3
-START_ENEMY_DISTANCE = 0.55
-START_ENEMY_INCREMENT = 0.1
-
-# weapon
-# TODO eventually this will be changed to a dictionary to allow for multiple weapons (maybe custom ones too)
-WEAPON_BULLETS = 10
-WEAPON_COOLDOWN_FRAMES = seconds_to_frames(0.2)
-WEAPON_DAMAGE = 1
-WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
-
-# fonts
-init_font()
-FONT_FILE = "data/upheavtt.ttf"
-FONTS = {FontType.NORMAL: create_font(24),
-         FontType.UI: create_font(16),
-         FontType.GAMEOVER: create_font(64)}
-GAMEOVER_FONT_COLOR = Color(255, 0, 0)
-PAUSE_FONT_COLOR = Color(255, 255, 255)
-RESTART_FONT_COLOR = Color(128, 128, 128)
-UI_FONT_COLOR = Color(192, 192, 192)
-
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)
 BULLET_COLOR = Color(0, 128, 255)
 ENEMY_COLOR = Color(64, 255, 16)
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0, 192)  # with alpha value
 PLAYER_COLOR = Color(0, 255, 255)
-
-# tile
-TILE = load_image("data/tile.png")
-TILE_SIZE = Vector2(TILE.get_size())
-TILE_CENTER = TILE_SIZE / 2
-
-# camera
-CAMERA_SPEED = 3 / FPS  # divide by FPS for framerate independence
-
-# ui
-UI_BORDER_OFFSET = 15
-AIM_LINE_LENGTH = 40
 
 # player
 PLAYER_I_FRAMES = seconds_to_frames(3)

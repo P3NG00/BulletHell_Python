@@ -1,6 +1,7 @@
 import random
 import pygame as pg
 import json
+from enum import Enum
 from numpy import cos
 from numpy import pi
 from numpy import sin
@@ -11,64 +12,64 @@ from pygame.display import iconify as minimize_window
 from pygame.display import set_caption as set_window_title
 from pygame.display import set_mode as create_window
 from pygame.draw import line as draw_line
+from pygame.font import Font
+from pygame.image import load as load_image
 from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
-from data.constants import AIM_LINE_LENGTH
 from data.constants import BULLET_RADIUS
-from data.constants import CAMERA_SPEED
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
-from data.constants import FONTS
-from data.constants import FontType
 from data.constants import FPS
-from data.constants import GAMEOVER_FONT_COLOR
-from data.constants import PAUSE_FONT_COLOR
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
-from data.constants import RESTART_FONT_COLOR
-from data.constants import SETTINGS_DEFAULT
-from data.constants import SETTINGS_FILE
-from data.constants import START_ENEMY_AMOUNT
-from data.constants import START_ENEMY_DISTANCE
-from data.constants import START_ENEMY_INCREMENT
+from data.constants import seconds_to_frames
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
-from data.constants import TILE
-from data.constants import TILE_SIZE
 from data.constants import TITLE
-from data.constants import UI_BORDER_OFFSET
-from data.constants import UI_FONT_COLOR
-from data.constants import WEAPON_BULLETS
-from data.constants import WEAPON_COOLDOWN_FRAMES
-from data.constants import WEAPON_DAMAGE
-from data.constants import WEAPON_RELOAD_FRAMES
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
 from data.game_object import test_collision
 
-
 """main game script"""
 
+pg.init()
+
+# fonts
+class FontType(Enum):
+    """font types"""
+    NORMAL = 0
+    UI = 1
+    GAMEOVER = 2
+
+def create_font(size: int) -> Font:
+    """creates a font object of specified size"""
+    return Font(FONT_FILE, size)
+
+FONT_FILE = "data/upheavtt.ttf"
+FONTS = {FontType.NORMAL: create_font(24),
+         FontType.UI: create_font(16),
+         FontType.GAMEOVER: create_font(64)}
+GAMEOVER_FONT_COLOR = Color(255, 0, 0)
+PAUSE_FONT_COLOR = Color(255, 255, 255)
+RESTART_FONT_COLOR = Color(128, 128, 128)
+UI_FONT_COLOR = Color(192, 192, 192)
 
 def create_text_surface(text: str, color: Color, font_type: FontType) -> Surface:
     """returns a surface with colored text"""
     return FONTS[font_type].render(text, False, color)
 
-
 def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
     surface_main.blit(surface_fade, (0, 0))
-
 
 def surface_apply_pause() -> None:
     """applies pause overlay (over fade) to main surface"""
     surface_apply_fade()
     surface_main.blit(surface_text_pause, (SURFACE_SIZE -
                       surface_text_pause.get_size()) / 2)
-
 
 def surface_apply_game_over() -> None:
     """applied game over and restart text (over fade) to main surface"""
@@ -80,23 +81,19 @@ def surface_apply_game_over() -> None:
     surface_main.blit(surface_text_restart, center -
                       Vector2(surface_text_restart.get_size()) / 2)
 
-
 def random_vector() -> Vector2:
     """returns a unit vector with a random direction"""
     random_angle = random.uniform(0, 2 * pi)
     return Vector2(cos(random_angle), sin(random_angle))
-
 
 def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
     obj_enemy.append(Enemy(player.pos + (random_vector() *
                      ENEMY_SPAWN_DISTANCE * distance_scale)))
 
-
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
     return (get_mouse_pos() + camera_offset - player.pos).normalize()
-
 
 def fire_bullet() -> None:
     """fires a bullet in the direction of the mouse if bullets are available"""
@@ -116,7 +113,6 @@ def fire_bullet() -> None:
         direction = get_mouse_direction()
         obj_bullet.append(
             Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
-
 
 def reset_game() -> None:
     """resets game data"""
@@ -138,6 +134,34 @@ def reset_game() -> None:
     # spawn enemies shorter than regular spawn distance
     for i in range(START_ENEMY_AMOUNT):
         spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
+
+# default game settings
+SETTINGS_FILE = "data/settings.json"
+SETTINGS_DEFAULT = {"show_aim_line": True}
+
+# game values
+START_ENEMY_AMOUNT = 3
+START_ENEMY_DISTANCE = 0.55
+START_ENEMY_INCREMENT = 0.1
+
+# weapon
+# TODO eventually this will be changed to a dictionary to allow for multiple weapons (maybe custom ones too)
+WEAPON_BULLETS = 10
+WEAPON_COOLDOWN_FRAMES = seconds_to_frames(0.2)
+WEAPON_DAMAGE = 1
+WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
+
+# tile
+TILE = load_image("data/tile.png")
+TILE_SIZE = Vector2(TILE.get_size())
+TILE_CENTER = TILE_SIZE / 2
+
+# camera
+CAMERA_SPEED = 3 / FPS  # divide by FPS for framerate independence
+
+# ui
+UI_BORDER_OFFSET = 15
+AIM_LINE_LENGTH = 40
 
 
 # begin main script

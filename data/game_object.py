@@ -20,7 +20,6 @@ from .constants import PLAYER_LIFE
 from .constants import PLAYER_RADIUS
 from .constants import PLAYER_SPEED
 
-
 # abstract class
 class GameObject(ABC):
     """in-game objects"""
@@ -49,7 +48,6 @@ class GameObject(ABC):
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
         return (self.pos - other.pos).magnitude() < self.radius + other.radius
-
 
 class Player(GameObject):
     """player game object"""
@@ -85,7 +83,6 @@ class Player(GameObject):
         if self.i_frames % 2 == 0:
             super().draw(surface, camera_offset)
 
-
 class Bullet(GameObject):
     """bullet game object"""
 
@@ -116,7 +113,6 @@ class Enemy(GameObject):
         # check player collision
         if test_collision(self, player):
             player.damage()
-
 
 def test_collision(obj_1: GameObject, obj_2: GameObject) -> bool:
     """if objects collide, reposition. returns if collided"""
