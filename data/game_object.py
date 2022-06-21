@@ -24,13 +24,13 @@ class GameObject(ABC):
     """in-game objects"""
 
     @abstractmethod
-    def __init__(self, pos: Vector2, radius: int, speed: float, color: Color, life: float = None):
+    def __init__(self, pos: Vector2, radius: int, speed: float, color: Color, life: float = None, direction: Vector2 = Vector2(0)):
         self.pos = pos
         self.radius = radius
         self.speed = speed
         self.color = color
         self.life = life
-        self.direction = Vector2(0)
+        self.direction = direction
 
     def is_alive(self) -> bool:
         """returns if the game object has life remaining"""
@@ -86,8 +86,7 @@ class Bullet(GameObject):
     """bullet game object"""
 
     def __init__(self, pos: Vector2, direction: Vector2):
-        super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, BULLET_LIFE)
-        self.direction = direction
+        super().__init__(pos, BULLET_RADIUS, BULLET_SPEED, BULLET_COLOR, BULLET_LIFE, direction)
 
     def update(self) -> None:
         # tick life
