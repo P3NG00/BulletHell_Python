@@ -16,6 +16,7 @@ class Draw:
         self.tile_size = Vector2(tile.get_size())
         self.camera_offset = None
         self.anti_aliasing = False
+        self._blit_info = []
 
     def update(self, pos: Vector2, anti_aliasing: bool) -> None:
         """updates the draw object"""
@@ -28,12 +29,14 @@ class Draw:
         # blit background tiles
         start_x = (-self.camera_offset.x % self.tile_size.x) - self.tile_size.x
         current_pos = Vector2(start_x, (-self.camera_offset.y % self.tile_size.y) - self.tile_size.y)
+        self._blit_info.clear()
         while current_pos.y < SURFACE_SIZE.y:
             while current_pos.x < SURFACE_SIZE.x:
-                self.surface.blit(self.tile, current_pos)
+                self._blit_info.append((self.tile, current_pos.copy()))
                 current_pos.x += self.tile_size.x
             current_pos.x = start_x
             current_pos.y += self.tile_size.y
+        self.surface.blits(self._blit_info)
 
     def circle(self, color: Color, center: Vector2, radius: float) -> None:
         """draws a circle"""
