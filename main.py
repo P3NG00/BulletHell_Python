@@ -164,7 +164,7 @@ WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # tile
-TILE = load_image("data/tile.png").convert()
+TILE = load_image("images/tile.png").convert()
 
 # ui
 UI_BORDER_OFFSET = 15
