@@ -3,9 +3,9 @@ from pygame import Color
 from pygame import gfxdraw
 from pygame import Surface
 from pygame import Vector2
+from .constants import CAMERA_SPEED
 from .constants import SURFACE_CENTER
 from .constants import SURFACE_SIZE
-from .constants import CAMERA_SPEED
 
 class Draw:
     """draw functions"""

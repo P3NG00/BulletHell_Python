@@ -36,16 +36,17 @@ from data.game_object import test_collision
 """main game script"""
 
 pg.init()
+
 # default game settings
 SETTINGS_FILE = "data/settings.json"
-SETTINGS_DEFAULT = {"anti-aliasing": False,
-                    "show_aim_line": True}
 # game settings
 try:
     with open(SETTINGS_FILE) as file:
         settings = json.load(file)
 except:
-    settings = SETTINGS_DEFAULT
+    settings = {"anti-aliasing": False,
+                "show_aim_line": True}
+
 # fonts
 class FontType(Enum):
     """font types"""
@@ -61,26 +62,22 @@ FONT_FILE = "data/upheavtt.ttf"
 FONTS = {FontType.NORMAL: create_font(24),
          FontType.UI: create_font(16),
          FontType.GAMEOVER: create_font(64)}
+
+# font colors
 GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
 UI_FONT_COLOR = Color(192, 192, 192)
 
 # surfaces
-def create_text_surface(text: str, color: Color, font_type: FontType) -> Surface:
-    """returns a surface with colored text"""
-    return FONTS[font_type].render(text, settings["anti-aliasing"], color)
-
 surface_main = create_window(SURFACE_SIZE)
 surface_fade = Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
-surface_text_pause = create_text_surface(
-    "Paused", PAUSE_FONT_COLOR, FontType.NORMAL)
-surface_text_gameover = create_text_surface(
-    "GAME OVER", GAMEOVER_FONT_COLOR, FontType.GAMEOVER)
-surface_text_restart = create_text_surface(
-    "Press SPACE to restart...", RESTART_FONT_COLOR, FontType.NORMAL)
+
+def create_text_surface(color: Color, font_type: FontType, text: str) -> Surface:
+    """returns a surface with colored text"""
+    return FONTS[font_type].render(text, settings["anti-aliasing"], color)
 
 def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
@@ -89,18 +86,18 @@ def surface_apply_fade() -> None:
 def surface_apply_pause() -> None:
     """applies pause overlay (over fade) to main surface"""
     surface_apply_fade()
-    surface_main.blit(surface_text_pause, (SURFACE_SIZE -
-                      surface_text_pause.get_size()) / 2)
+    surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, "Paused")
+    surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)
 
 def surface_apply_game_over() -> None:
     """applied game over and restart text (over fade) to main surface"""
     surface_apply_fade()
-    center = SURFACE_SIZE / 2
-    surface_main.blit(surface_text_gameover, center -
-                      Vector2(surface_text_gameover.get_size()) / 2)
+    center = SURFACE_CENTER.copy()
+    surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, "GAME OVER")
+    surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, "Press SPACE to restart...")
+    surface_main.blit(surface_text_gameover, center - Vector2(surface_text_gameover.get_size()) / 2)
     center.y += surface_text_gameover.get_height()
-    surface_main.blit(surface_text_restart, center -
-                      Vector2(surface_text_restart.get_size()) / 2)
+    surface_main.blit(surface_text_restart, center - Vector2(surface_text_restart.get_size()) / 2)
 
 def random_vector() -> Vector2:
     """returns a unit vector with a random direction"""
@@ -341,8 +338,7 @@ while running:
         current_height = UI_BORDER_OFFSET
         for i in range(len(ui_info)):
             # replace index with blit information
-            ui_info[i] = (create_text_surface(
-                ui_info[i], UI_FONT_COLOR, FontType.UI), (UI_BORDER_OFFSET + 5, current_height))
+            ui_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, ui_info[i]), (UI_BORDER_OFFSET + 5, current_height))
             # move downwards from last height
             current_height += ui_info[i][0].get_height()
         # blit surfaces
