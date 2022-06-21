@@ -117,7 +117,6 @@ def test_collision(obj_1: GameObject, obj_2: GameObject) -> bool:
     """if objects collide, reposition. returns if collided"""
     if obj_1 is not obj_2 and obj_1.is_touching(obj_2):
         # reposition self
-        obj_1.pos = obj_2.pos - \
-            (obj_2.pos - obj_1.pos).normalize() * (obj_1.radius + obj_2.radius)
+        obj_1.pos = obj_2.pos - (obj_2.pos - obj_1.pos).normalize() * (obj_1.radius + obj_2.radius)
         return True
     return False

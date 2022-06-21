@@ -106,8 +106,7 @@ def random_vector() -> Vector2:
 
 def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
-    obj_enemy.append(Enemy(player.pos + (random_vector() *
-                     ENEMY_SPAWN_DISTANCE * distance_scale)))
+    obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)))
 
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
@@ -129,8 +128,7 @@ def fire_bullet() -> None:
             weapon_cooldown = WEAPON_COOLDOWN_FRAMES
         # create new bullet object in front of player
         direction = get_mouse_direction()
-        obj_bullet.append(
-            Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
+        obj_bullet.append(Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
 
 def reset_game() -> None:
     """resets game data"""
@@ -322,8 +320,7 @@ while running:
     if player.is_alive():
         if not pause and settings["show_aim_line"]:
             # draw aim line
-            start_pos = player.pos + \
-                (get_mouse_direction() * (player.radius * 2))
+            start_pos = player.pos + (get_mouse_direction() * (player.radius * 2))
             draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, 2)
         # these are printed top to bottom
         ui_info = [f"pos_x: {player.pos.x:.2f}",
