@@ -15,6 +15,7 @@ class Draw:
         self.tile = tile
         self.tile_size = Vector2(tile.get_size())
         self.camera_offset = -SURFACE_CENTER
+        self.anti_aliasing = False
 
     def update(self, pos: Vector2, anti_aliasing: bool) -> None:
         """updates the draw object"""
