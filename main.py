@@ -18,17 +18,16 @@ from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
 from data.constants import BULLET_RADIUS
-from data.constants import draw_line
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
-from data.constants import make_framerate_independent
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import seconds_to_frames
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
 from data.constants import TITLE
+from data.draw import Draw
 from data.game_object import Bullet
 from data.game_object import Enemy
 from data.game_object import Player
@@ -115,7 +114,7 @@ def spawn_enemy(distance_scale: float = 1.0) -> None:
 
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
-    return (get_mouse_pos() + camera_offset - player.pos).normalize()
+    return (get_mouse_pos() + draw.camera_offset - player.pos).normalize()
 
 def fire_bullet() -> None:
     """fires a bullet in the direction of the mouse if bullets are available"""
@@ -138,9 +137,9 @@ def fire_bullet() -> None:
 
 def reset_game() -> None:
     """resets game data"""
-    global camera_offset, player, obj_bullet, obj_enemy, weapon_cooldown, weapon_reload, stats
+    global player, obj_bullet, obj_enemy, weapon_cooldown, weapon_reload, stats
     # reset camera offset
-    camera_offset = -SURFACE_CENTER
+    draw.camera_offset = -SURFACE_CENTER
     # reset game objects
     player = Player(Vector2(0))
     obj_bullet, obj_enemy = [], []
@@ -171,11 +170,6 @@ WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # tile
 TILE = load_image("data/tile.png").convert()
-TILE_SIZE = Vector2(TILE.get_size())
-TILE_CENTER = TILE_SIZE / 2
-
-# camera
-CAMERA_SPEED = make_framerate_independent(3)
 
 # ui
 UI_BORDER_OFFSET = 15
@@ -185,13 +179,13 @@ AIM_LINE_LENGTH = 40
 # begin main script
 set_window_title(TITLE)
 # program info
+draw = Draw(surface_main, TILE)
 clock = Clock()
 input = Vector2(0)
 pause = False
 running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
 # game data
-camera_offset = None
 player = None
 obj_bullet = None
 obj_enemy = None
@@ -314,36 +308,26 @@ while running:
         obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
         # increment kill for each dead enemy
         stats["kills"] += enemies - len(obj_enemy)
-        # move camera_offset towards player position
-        camera_offset = camera_offset.lerp(
-            player.pos - SURFACE_CENTER, CAMERA_SPEED)
+        # update draw object
+        draw.update(player.pos, settings["anti-aliasing"])
 
     # Render
 
-    # blit background tiles
-    start_x = (-camera_offset.x % TILE_SIZE.x) - TILE_SIZE.x
-    current_pos = Vector2(start_x, (-camera_offset.y %
-                          TILE_SIZE.y) - TILE_SIZE.y)
-    while current_pos.y < SURFACE_SIZE.y:
-        while current_pos.x < SURFACE_SIZE.x:
-            surface_main.blit(TILE, current_pos)
-            current_pos.x += TILE_SIZE.x
-        current_pos.x = start_x
-        current_pos.y += TILE_SIZE.y
+    # draw background
+    draw.background()
     # draw game objects
     if player.is_alive():
-        player.draw(surface_main, camera_offset, settings["anti-aliasing"])
+        player.draw(draw)
     for obj_list in [obj_enemy, obj_bullet]:
         for obj in obj_list:
-            obj.draw(surface_main, camera_offset, settings["anti-aliasing"])
+            obj.draw(draw)
     # display appropriate ui
     if player.is_alive():
         if not pause and settings["show_aim_line"]:
             # draw aim line
             start_pos = player.pos + \
-                (get_mouse_direction() * (player.radius * 2)) - camera_offset
-            draw_line(surface_main, AIM_LINE_COLOR, start_pos,
-                start_pos + (get_mouse_direction() * AIM_LINE_LENGTH), 2, settings["anti-aliasing"])
+                (get_mouse_direction() * (player.radius * 2))
+            draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, 2)
         # these are printed top to bottom
         ui_info = [f"pos_x: {player.pos.x:.2f}",
                    f"pos_y: {player.pos.y:.2f}",

@@ -1,5 +1,4 @@
 from pygame import Color
-from pygame import Surface
 from pygame.math import Vector2
 from abc import ABC
 from abc import abstractmethod
@@ -7,7 +6,6 @@ from .constants import BULLET_COLOR
 from .constants import BULLET_LIFE
 from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
-from .constants import draw_circle
 from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
@@ -19,6 +17,7 @@ from .constants import PLAYER_I_FRAMES
 from .constants import PLAYER_LIFE
 from .constants import PLAYER_RADIUS
 from .constants import PLAYER_SPEED
+from .draw import Draw
 
 # abstract class
 class GameObject(ABC):
@@ -41,9 +40,9 @@ class GameObject(ABC):
         """moves the game object with its direction"""
         self.pos += make_framerate_independent(self.direction * self.speed)
 
-    def draw(self, surface: Surface, camera_offset: Vector2, anti_aliasing: bool) -> None:
+    def draw(self, draw: Draw) -> None:
         """draws the object to the surface"""
-        draw_circle(surface, self.color, self.pos - camera_offset, self.radius, anti_aliasing)
+        draw.circle(self.color, self.pos, self.radius)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
@@ -78,10 +77,10 @@ class Player(GameObject):
         # update movement this frame
         super().update()
 
-    def draw(self, surface: Surface, camera_offset: Vector2, anti_aliasing: bool) -> None:
+    def draw(self, draw: Draw) -> None:
         """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
-            super().draw(surface, camera_offset, anti_aliasing)
+            super().draw(draw)
 
 class Bullet(GameObject):
     """bullet game object"""

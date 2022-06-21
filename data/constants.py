@@ -1,7 +1,4 @@
-import pygame
 from pygame import Color
-from pygame import gfxdraw
-from pygame import Surface
 from pygame import Vector2
 
 """ constant game values """
@@ -20,23 +17,8 @@ SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
 
-# draw functions
-def draw_circle(surface: Surface, color: Color, center: Vector2, radius: float, anti_aliasing: bool) -> None:
-    """draws a circle"""
-    if anti_aliasing:
-        radius, x, y = int(radius), int(center.x), int(center.y)
-        gfxdraw.aacircle(surface, x, y, radius, color)
-        gfxdraw.filled_circle(surface, x, y, radius, color)
-    else:
-        pygame.draw.circle(surface, color, center, radius)
-
-def draw_line(surface: Surface, color: Color, start: Vector2, end: Vector2, width: float, anti_aliasing: bool) -> None:
-    """draws a line"""
-    if anti_aliasing:
-        # TODO https://stackoverflow.com/questions/30578068/pygame-draw-anti-aliased-thick-line
-        pygame.draw.aaline(surface, color, start, end)
-    else:
-        pygame.draw.line(surface, color, start, end, width)
+# camera
+CAMERA_SPEED = make_framerate_independent(3)
 
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)
@@ -62,4 +44,4 @@ ENEMY_RADIUS = 16.0
 ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude()
 ENEMY_SPAWN_RATE = seconds_to_frames(1.25)
 ENEMY_SPEED = 150.0
-ENEMY_TRACKING = make_framerate_independent(0.5)
+ENEMY_TRACKING = make_framerate_independent(1.5)
