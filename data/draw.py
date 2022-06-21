@@ -14,15 +14,14 @@ class Draw:
         self.surface = surface
         self.tile = tile
         self.tile_size = Vector2(tile.get_size())
-        self.camera_offset = -SURFACE_CENTER
+        self.camera_offset = None
         self.anti_aliasing = False
 
     def update(self, pos: Vector2, anti_aliasing: bool) -> None:
         """updates the draw object"""
         self.anti_aliasing = anti_aliasing
         # lerp camera offset towards player position
-        self.camera_offset = self.camera_offset.lerp(
-            pos - SURFACE_CENTER, CAMERA_SPEED)
+        self.camera_offset = self.camera_offset.lerp(pos - SURFACE_CENTER, CAMERA_SPEED)
 
     def background(self) -> None:
         """draws background"""
