@@ -24,8 +24,8 @@ class Draw:
         # lerp camera offset towards player position
         self.camera_offset = self.camera_offset.lerp(pos - SURFACE_CENTER, CAMERA_SPEED)
 
-    def background(self) -> None:
-        """draws background"""
+    def background(self) -> int:
+        """draws background, returns amount of tiles drawn"""
         # blit background tiles
         start_x = (-self.camera_offset.x % self.tile_size.x) - self.tile_size.x
         current_pos = Vector2(start_x, (-self.camera_offset.y % self.tile_size.y) - self.tile_size.y)
@@ -37,6 +37,7 @@ class Draw:
             current_pos.x = start_x
             current_pos.y += self.tile_size.y
         self.surface.blits(self._blit_info)
+        return len(self._blit_info)
 
     def circle(self, color: Color, center: Vector2, radius: float) -> None:
         """draws a circle"""

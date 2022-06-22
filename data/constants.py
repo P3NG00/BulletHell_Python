@@ -34,12 +34,23 @@ FPS = 65.0
 # camera
 CAMERA_SPEED = make_framerate_independent(3)
 
+# text
+TEXT_GAME_OVER = "GAME OVER"
+TEXT_PAUSE = "Paused"
+TEXT_RESTART = "Press SPACE to restart..."
+
+# ui
+UI_BORDER_OFFSET = 15
+AIM_LINE_LENGTH = 40
+AIM_LINE_WIDTH = 2
+
 # font file
 FONT_FILE = "data/upheavtt.ttf"
 
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)
 BULLET_COLOR = Color(0, 128, 255)
+DEBUG_LINE_COLOR = Color(255, 64, 128)
 ENEMY_COLOR = Color(64, 255, 16)
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0, 192)  # with alpha value
 PLAYER_COLOR = Color(0, 255, 255)

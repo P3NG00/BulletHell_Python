@@ -12,6 +12,8 @@ from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
+from data.constants import AIM_LINE_LENGTH
+from data.constants import AIM_LINE_WIDTH
 from data.constants import BULLET_RADIUS
 from data.constants import create_font
 from data.constants import ENEMY_SPAWN_DISTANCE
@@ -23,7 +25,11 @@ from data.constants import random_vector
 from data.constants import seconds_to_frames
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
+from data.constants import TEXT_GAME_OVER
+from data.constants import TEXT_PAUSE
+from data.constants import TEXT_RESTART
 from data.constants import TITLE
+from data.constants import UI_BORDER_OFFSET
 from data.draw import Draw
 from data.game_object import Bullet
 from data.game_object import Enemy
@@ -34,15 +40,38 @@ from data.game_object import test_collision
 
 pg.init()
 
-# default game settings
-SETTINGS_FILE = "data/settings.json"
 # game settings
+SETTINGS_FILE = "data/settings.json"
+
+ANTI_ALIASING = "anti_aliasing"
+SHOW_AIM_LINE = "show_aim_line"
+SHOW_DEBUG_INFO = "show_debug_info"
+
+DEFAULT_SETTINGS = {ANTI_ALIASING: False,
+                    SHOW_AIM_LINE: True,
+                    SHOW_DEBUG_INFO: False}
+
+# attempt to load settings from file
 try:
     with open(SETTINGS_FILE) as file:
         settings = json.load(file)
+    default_copy = DEFAULT_SETTINGS.copy()
+    # delete invalid settings
+    for setting in settings.copy():
+        try:
+            del default_copy[setting]
+        except KeyError:
+            del settings[setting]
+    # add missing settings
+    for setting in default_copy:
+        settings[setting] = default_copy[setting]
+# error loading file, use default settings
 except:
-    settings = {"anti-aliasing": False,
-                "show_aim_line": True}
+    settings = DEFAULT_SETTINGS
+
+def toggle_setting(setting: str) -> None:
+    """toggles specified setting"""
+    settings[setting] = not settings[setting]
 
 # fonts
 class FontType(Enum):
@@ -69,7 +98,7 @@ surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
 
 def create_text_surface(color: Color, font_type: FontType, text: str) -> Surface:
     """returns a surface with colored text"""
-    return FONTS[font_type].render(text, settings["anti-aliasing"], color)
+    return FONTS[font_type].render(text, settings[ANTI_ALIASING], color)
 
 def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
@@ -118,11 +147,6 @@ WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # tile
 TILE = load_image("images/tile.png").convert()
-
-# ui
-UI_BORDER_OFFSET = 15
-AIM_LINE_LENGTH = 40
-
 
 # begin main script
 set_window_title(TITLE)
@@ -178,8 +202,11 @@ while running:
                         if not player.is_alive():
                             reset_game()
                     # toggle anti-aliasing
+                    case pg.K_F1:
+                        toggle_setting(ANTI_ALIASING)
+                    # toggle debug info
                     case pg.K_F12:
-                        settings["anti-aliasing"] = not settings["anti-aliasing"]
+                        toggle_setting(SHOW_DEBUG_INFO)
                 # movement input press
                 match event.key:
                     case pg.K_w:
@@ -222,7 +249,7 @@ while running:
                     # toggle aim line
                     case 3:
                         if not pause:
-                            settings["show_aim_line"] = not settings["show_aim_line"]
+                            toggle_setting(SHOW_AIM_LINE)
         # end of event handling
 
     # check pause
@@ -254,8 +281,8 @@ while running:
             for enemy in obj_enemy:
                 # if bullet hits enemy
                 if bullet.is_touching(enemy):
-                    bullet.life = 0
-                    enemy.life -= WEAPON_DAMAGE
+                    bullet.kill()
+                    enemy.damage(WEAPON_DAMAGE)
                     stats["hits"] += 1
         # update enemies
         for enemy in obj_enemy:
@@ -270,54 +297,54 @@ while running:
         # increment kill for each dead enemy
         stats["kills"] += enemies - len(obj_enemy)
         # update draw object
-        draw.update(player.pos, settings["anti-aliasing"])
+        draw.update(player.pos, settings[ANTI_ALIASING])
 
     # Render
 
     # draw background
-    draw.background()
+    tiles_drawn = draw.background()
     # draw game objects
-    if player.is_alive():
-        player.draw(draw)
+    player.draw(draw, settings[SHOW_DEBUG_INFO])
     for obj_list in [obj_enemy, obj_bullet]:
         for obj in obj_list:
-            obj.draw(draw)
+            obj.draw(draw, settings[SHOW_DEBUG_INFO])
     # display appropriate ui
     if player.is_alive():
-        if not pause and settings["show_aim_line"]:
+        if not pause and settings[SHOW_AIM_LINE]:
             # draw aim line
             start_pos = player.pos + (get_mouse_direction() * (player.radius * 2))
-            draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, 2)
-        # these are printed top to bottom
-        ui_info = [f"pos_x: {player.pos.x:.2f}",
-                   f"pos_y: {player.pos.y:.2f}",
-                   f"fps: {clock.get_fps():.2f}",
-                   f"distance: {stats['distance']:.2f}",
-                   f"bullets: {stats['bullets']}",
-                   f"shots: {stats['shots']}",
-                   f"hits: {stats['hits']}",
-                   f"kills: {stats['kills']}",
-                   f"life: {player.life}"]
-        current_height = UI_BORDER_OFFSET
-        for i in range(len(ui_info)):
-            # replace index with blit information
-            ui_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, ui_info[i]), (UI_BORDER_OFFSET + 5, current_height))
-            # move downwards from last height
-            current_height += ui_info[i][0].get_height()
-        # blit surfaces
-        surface_main.blits(ui_info)
+            draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
+        if settings[SHOW_DEBUG_INFO]:
+            # these are printed top to bottom
+            debug_info = [f"screen_width: {SURFACE_SIZE.x}",
+                          f"screen_height: {SURFACE_SIZE.y}",
+                          f"frames_per_second: {clock.get_fps():.3f}",
+                          f"pos_x: {player.pos.x:.3f}",
+                          f"pos_y: {player.pos.y:.3f}",
+                          f"entity_enemies: {len(obj_enemy)}",
+                          f"entity_bullets: {len(obj_bullet)}",
+                          f"tiles_drawn: {tiles_drawn}",
+                          f"enemy_spawn_time: {current_enemy_spawn_time}"]
+            current_height = UI_BORDER_OFFSET
+            for i in range(len(debug_info)):
+                # replace index with blit information
+                debug_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, debug_info[i]), (UI_BORDER_OFFSET + 5, current_height))
+                # move downwards from last height
+                current_height += debug_info[i][0].get_height()
+            # blit surfaces
+            surface_main.blits(debug_info)
         # if paused overlay fade
         if pause:
             # apply pause overlay
             surface_apply_fade()
-            surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, "Paused")
+            surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, TEXT_PAUSE)
             surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)
     else:
         # apply game over and restart text
         surface_apply_fade()
         center = SURFACE_CENTER.copy()
-        surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, "GAME OVER")
-        surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, "Press SPACE to restart...")
+        surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, TEXT_GAME_OVER)
+        surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, TEXT_RESTART)
         surface_main.blit(surface_text_gameover, center - Vector2(surface_text_gameover.get_size()) / 2)
         center.y += surface_text_gameover.get_height()
         surface_main.blit(surface_text_restart, center - Vector2(surface_text_restart.get_size()) / 2)

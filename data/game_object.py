@@ -2,10 +2,13 @@ from pygame import Color
 from pygame.math import Vector2
 from abc import ABC
 from abc import abstractmethod
+from .constants import AIM_LINE_LENGTH
+from .constants import AIM_LINE_WIDTH
 from .constants import BULLET_COLOR
 from .constants import BULLET_LIFE
 from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
+from .constants import DEBUG_LINE_COLOR
 from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
@@ -28,20 +31,31 @@ class GameObject(ABC):
         self.radius = radius
         self.speed = speed
         self.color = color
-        self.life = life
         self.direction = direction
+        self._life = life
 
     def is_alive(self) -> bool:
         """returns if the game object has life remaining"""
-        return self.life > 0.0
+        return self._life > 0.0
+
+    def damage(self, amount: int = 1) -> None:
+        """reduces the object's life"""
+        self._life -= amount
+
+    def kill(self) -> None:
+        """instantly kills the game object"""
+        self._life = 0
 
     def update(self) -> None:
         """moves the game object with its direction"""
         self.pos += make_framerate_independent(self.direction * self.speed)
 
-    def draw(self, draw: Draw) -> None:
+    def draw(self, draw: Draw, draw_direction: bool) -> None:
         """draws the object to the surface"""
-        draw.circle(self.color, self.pos, self.radius)
+        if self.is_alive():
+            draw.circle(self.color, self.pos, self.radius)
+            if draw_direction:
+                draw.line(DEBUG_LINE_COLOR, self.pos, self.direction, AIM_LINE_LENGTH, AIM_LINE_WIDTH)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
@@ -58,11 +72,11 @@ class Player(GameObject):
         """returns if the player can take damage"""
         return self.i_frames == 0
 
-    def damage(self) -> None:
+    def damage(self, amount: int = 1) -> None:
         """reduces the player's life and starts i-frames"""
         if self.is_vulnerable():
-            self.life -= 1
             self.i_frames = PLAYER_I_FRAMES
+            super().damage(amount)
 
     def update(self, input: Vector2) -> None:
         """used to handle movement input"""
@@ -76,10 +90,10 @@ class Player(GameObject):
         # update movement this frame
         super().update()
 
-    def draw(self, draw: Draw) -> None:
+    def draw(self, draw: Draw, draw_direction: bool) -> None:
         """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
-            super().draw(draw)
+            super().draw(draw, draw_direction)
 
 class Bullet(GameObject):
     """bullet game object"""
@@ -89,10 +103,9 @@ class Bullet(GameObject):
 
     def update(self) -> None:
         # tick life
-        self.life -= 1
+        self._life -= 1
         # update movement this frame
         super().update()
-
 
 class Enemy(GameObject):
     """enemy game object"""
