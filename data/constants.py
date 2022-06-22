@@ -40,9 +40,11 @@ TEXT_PAUSE = "Paused"
 TEXT_RESTART = "Press SPACE to restart..."
 
 # ui
+DEBUG_LINE_LENGTH = 20
+DEBUG_LINE_WIDTH = 2
 UI_BORDER_OFFSET = 15
 AIM_LINE_LENGTH = 40
-AIM_LINE_WIDTH = 2
+AIM_LINE_WIDTH = 3
 
 # font file
 FONT_FILE = "data/upheavtt.ttf"

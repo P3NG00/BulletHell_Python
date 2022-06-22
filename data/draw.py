@@ -1,9 +1,13 @@
 import pygame
+from math import atan2
+from math import cos
+from math import sin
 from pygame import Color
 from pygame import gfxdraw
 from pygame import Surface
 from pygame import Vector2
 from .constants import CAMERA_SPEED
+from .constants import DEBUG_LINE_WIDTH
 from .constants import SURFACE_CENTER
 from .constants import SURFACE_SIZE
 
@@ -56,6 +60,22 @@ class Draw:
         start = start.copy() - self.camera_offset
         end = start + (direction * length)
         if self.anti_aliasing:
-            pygame.draw.aaline(self.surface, color, start, end)
+            # pygame.draw.aaline(self.surface, color, start, end)
+            center = (start + end) / 2
+            half_length = (start - end).length() / 2
+            half_thickness = DEBUG_LINE_WIDTH / 2
+            angle = atan2(start.y - end.y, start.x - end.x)
+            angle_cos = cos(angle)
+            angle_sin = sin(angle)
+            points = ((center.x + half_length * angle_cos - half_thickness * angle_sin,
+                       center.y + half_thickness * angle_cos + half_length * angle_sin),
+                      (center.x - half_length * angle_cos - half_thickness * angle_sin,
+                       center.y + half_thickness * angle_cos - half_length * angle_sin),
+                      (center.x - half_length * angle_cos + half_thickness * angle_sin,
+                       center.y - half_thickness * angle_cos - half_length * angle_sin),
+                      (center.x + half_length * angle_cos + half_thickness * angle_sin,
+                       center.y - half_thickness * angle_cos + half_length * angle_sin))
+            gfxdraw.aapolygon(self.surface, points, color)
+            gfxdraw.filled_polygon(self.surface, points, color)
         else:
             pygame.draw.line(self.surface, color, start, end, width)
