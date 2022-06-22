@@ -103,7 +103,7 @@ class Bullet(GameObject):
 
     def update(self) -> None:
         # tick life
-        self._life -= 1
+        self.damage()
         # update movement this frame
         super().update()
 

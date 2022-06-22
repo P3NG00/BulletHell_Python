@@ -141,7 +141,6 @@ START_ENEMY_DISTANCE = 0.55
 START_ENEMY_INCREMENT = 0.1
 
 # weapon
-# TODO eventually this will be changed to a dictionary to allow for multiple weapons (maybe custom ones too)
 WEAPON_BULLETS = 10
 WEAPON_COOLDOWN_FRAMES = seconds_to_frames(0.2)
 WEAPON_DAMAGE = 1

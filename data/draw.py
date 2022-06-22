@@ -56,7 +56,6 @@ class Draw:
         start = start.copy() - self.camera_offset
         end = start + (direction * length)
         if self.anti_aliasing:
-            # TODO https://stackoverflow.com/questions/30578068/pygame-draw-anti-aliased-thick-line
             pygame.draw.aaline(self.surface, color, start, end)
         else:
             pygame.draw.line(self.surface, color, start, end, width)
