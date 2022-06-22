@@ -1,5 +1,10 @@
+import random
+from math import cos
+from math import pi
+from math import sin
 from pygame import Color
 from pygame import Vector2
+from pygame.font import Font
 
 """ constant game values """
 
@@ -11,6 +16,15 @@ def make_framerate_independent(value: float) -> float:
     """returns the value in frames per second"""
     return value / FPS
 
+def random_vector() -> Vector2:
+    """returns a unit vector with a random direction"""
+    random_angle = random.uniform(0, 2 * pi)
+    return Vector2(cos(random_angle), sin(random_angle))
+
+def create_font(size: int) -> Font:
+    """creates a font object of specified size"""
+    return Font(FONT_FILE, size)
+
 # window properties
 SURFACE_SIZE = Vector2(1280, 720)
 SURFACE_CENTER = SURFACE_SIZE / 2
@@ -19,6 +33,9 @@ FPS = 65.0
 
 # camera
 CAMERA_SPEED = make_framerate_independent(3)
+
+# font file
+FONT_FILE = "data/upheavtt.ttf"
 
 # colors
 AIM_LINE_COLOR = Color(255, 255, 255)

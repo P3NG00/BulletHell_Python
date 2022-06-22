@@ -1,28 +1,25 @@
-import random
 import pygame as pg
 import json
 from enum import Enum
-from numpy import cos
-from numpy import pi
-from numpy import sin
 from pygame import Surface
 from pygame.color import Color
 from pygame.display import flip as update_window
 from pygame.display import iconify as minimize_window
 from pygame.display import set_caption as set_window_title
 from pygame.display import set_mode as create_window
-from pygame.font import Font
 from pygame.image import load as load_image
 from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
 from data.constants import AIM_LINE_COLOR
 from data.constants import BULLET_RADIUS
+from data.constants import create_font
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
+from data.constants import random_vector
 from data.constants import seconds_to_frames
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
@@ -54,11 +51,6 @@ class FontType(Enum):
     UI = 1
     GAMEOVER = 2
 
-def create_font(size: int) -> Font:
-    """creates a font object of specified size"""
-    return Font(FONT_FILE, size)
-
-FONT_FILE = "data/upheavtt.ttf"
 FONTS = {FontType.NORMAL: create_font(24),
          FontType.UI: create_font(16),
          FontType.GAMEOVER: create_font(64)}
@@ -83,27 +75,6 @@ def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
     surface_main.blit(surface_fade, (0, 0))
 
-def surface_apply_pause() -> None:
-    """applies pause overlay (over fade) to main surface"""
-    surface_apply_fade()
-    surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, "Paused")
-    surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)
-
-def surface_apply_game_over() -> None:
-    """applied game over and restart text (over fade) to main surface"""
-    surface_apply_fade()
-    center = SURFACE_CENTER.copy()
-    surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, "GAME OVER")
-    surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, "Press SPACE to restart...")
-    surface_main.blit(surface_text_gameover, center - Vector2(surface_text_gameover.get_size()) / 2)
-    center.y += surface_text_gameover.get_height()
-    surface_main.blit(surface_text_restart, center - Vector2(surface_text_restart.get_size()) / 2)
-
-def random_vector() -> Vector2:
-    """returns a unit vector with a random direction"""
-    random_angle = random.uniform(0, 2 * pi)
-    return Vector2(cos(random_angle), sin(random_angle))
-
 def spawn_enemy(distance_scale: float = 1.0) -> None:
     """spawns enemy at random position"""
     obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)))
@@ -111,24 +82,6 @@ def spawn_enemy(distance_scale: float = 1.0) -> None:
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
     return (get_mouse_pos() + draw.camera_offset - player.pos).normalize()
-
-def fire_bullet() -> None:
-    """fires a bullet in the direction of the mouse if bullets are available"""
-    global weapon_cooldown, weapon_reload
-    # game not paused, player weapon not on cooldown or reloading, and player is alive
-    if not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
-        # update stats
-        stats["bullets"] -= 1
-        stats["shots"] += 1
-        # if last bullet begin reload
-        if stats["bullets"] == 0:
-            weapon_reload = WEAPON_RELOAD_FRAMES
-        # if bullets remain, start cooldown
-        else:
-            weapon_cooldown = WEAPON_COOLDOWN_FRAMES
-        # create new bullet object in front of player
-        direction = get_mouse_direction()
-        obj_bullet.append(Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
 
 def reset_game() -> None:
     """resets game data"""
@@ -250,11 +203,24 @@ while running:
                         input.x -= 1
             case pg.MOUSEBUTTONDOWN:
                 match event.button:
+                    # fire a bullet in the direction of the mouse if bullets are available
                     case 1:
-                        # shoot bullet
-                        fire_bullet()
+                        # game not paused, player weapon not on cooldown or reloading, and player is alive
+                        if not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
+                            # update stats
+                            stats["bullets"] -= 1
+                            stats["shots"] += 1
+                            # if last bullet begin reload
+                            if stats["bullets"] == 0:
+                                weapon_reload = WEAPON_RELOAD_FRAMES
+                            # if bullets remain, start cooldown
+                            else:
+                                weapon_cooldown = WEAPON_COOLDOWN_FRAMES
+                            # create new bullet object in front of player
+                            direction = get_mouse_direction()
+                            obj_bullet.append(Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
+                    # toggle aim line
                     case 3:
-                        # toggle aim line
                         if not pause:
                             settings["show_aim_line"] = not settings["show_aim_line"]
         # end of event handling
@@ -342,9 +308,19 @@ while running:
         surface_main.blits(ui_info)
         # if paused overlay fade
         if pause:
-            surface_apply_pause()
+            # apply pause overlay
+            surface_apply_fade()
+            surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, "Paused")
+            surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)
     else:
-        surface_apply_game_over()
+        # apply game over and restart text
+        surface_apply_fade()
+        center = SURFACE_CENTER.copy()
+        surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, "GAME OVER")
+        surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, "Press SPACE to restart...")
+        surface_main.blit(surface_text_gameover, center - Vector2(surface_text_gameover.get_size()) / 2)
+        center.y += surface_text_gameover.get_height()
+        surface_main.blit(surface_text_restart, center - Vector2(surface_text_restart.get_size()) / 2)
     # end of game update
 
     # display surface
