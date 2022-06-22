@@ -48,7 +48,7 @@ ANTI_ALIASING = "anti_aliasing"
 SHOW_AIM_LINE = "show_aim_line"
 SHOW_DEBUG_INFO = "show_debug_info"
 
-DEFAULT_SETTINGS = {ANTI_ALIASING: False,
+DEFAULT_SETTINGS = {ANTI_ALIASING: True,
                     SHOW_AIM_LINE: True,
                     SHOW_DEBUG_INFO: False}
 
