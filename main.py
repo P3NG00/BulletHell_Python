@@ -281,12 +281,6 @@ while running:
                     # reload finished
                     stats["bullets"] = WEAPON_BULLETS
         stats["distance"] += (player.pos - original_pos).length()
-        # update enemies
-        for enemy in obj_enemy:
-            enemy.update(player)
-            # test enemy collision
-            for enemy_ in obj_enemy:
-                test_collision(enemy, enemy_)
         # update bullets
         for bullet in obj_bullet:
             bullet.update()
@@ -297,6 +291,12 @@ while running:
                     bullet.life = 0
                     enemy.life -= WEAPON_DAMAGE
                     stats["hits"] += 1
+        # update enemies
+        for enemy in obj_enemy:
+            enemy.update(player)
+            # test enemy collision
+            for enemy_ in obj_enemy:
+                test_collision(enemy, enemy_)
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
         enemies = len(obj_enemy)

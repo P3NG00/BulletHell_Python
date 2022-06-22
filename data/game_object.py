@@ -19,9 +19,8 @@ from .constants import PLAYER_RADIUS
 from .constants import PLAYER_SPEED
 from .draw import Draw
 
-# abstract class
 class GameObject(ABC):
-    """in-game objects"""
+    """abstract game object"""
 
     @abstractmethod
     def __init__(self, pos: Vector2, radius: int, speed: float, color: Color, life: float = None, direction: Vector2 = Vector2(0)):
