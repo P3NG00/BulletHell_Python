@@ -7,7 +7,6 @@ from pygame.display import flip as update_window
 from pygame.display import iconify as minimize_window
 from pygame.display import set_caption as set_window_title
 from pygame.display import set_mode as create_window
-from pygame.image import load as load_image
 from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
@@ -146,8 +145,19 @@ WEAPON_COOLDOWN_FRAMES = seconds_to_frames(0.2)
 WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
-# tile
-TILE = load_image("images/tile.png").convert()
+# images
+def load_image(file: str, scale: int) -> Surface:
+    return pg.transform.scale(pg.image.load(f"images/{file}.png").convert_alpha(), Vector2(scale))
+
+TILE_SCALE = 96
+HEART_SCALE = 32
+HEART_SPACE_SCALE = HEART_SCALE / 4
+HEART_SPACE_SCALE_HALF = HEART_SPACE_SCALE / 2
+
+TILE = load_image("tile", TILE_SCALE)
+HEART = load_image("heart", HEART_SCALE)
+
+HEART_SIZE = Vector2(HEART.get_size())
 
 # begin main script
 set_window_title(TITLE)
@@ -317,10 +327,19 @@ while running:
             obj.draw(draw, settings[SHOW_DEBUG_INFO])
     # display appropriate ui
     if player.is_alive():
+        # draw aim line if not paused and setting is enabled
         if not pause and settings[SHOW_AIM_LINE]:
-            # draw aim line
             start_pos = player.pos + (get_mouse_direction() * (player.radius * 2))
             draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
+        # draw health
+        height = SURFACE_SIZE.y - HEART_SIZE.y - (HEART_SPACE_SCALE_HALF)
+        start = SURFACE_CENTER.x - (player._life * (HEART_SIZE.x / 2)) - (HEART_SPACE_SCALE * (player._life / 2))
+        health_info = []
+        for i in range(0, player._life):
+            health_info.append((HEART, (start, height)))
+            start += HEART_SIZE.x + HEART_SPACE_SCALE
+        surface_main.blits(health_info)
+        # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom
             debug_info = [f"screen_width: {SURFACE_SIZE.x}",
@@ -343,9 +362,8 @@ while running:
                 current_height += debug_info[i][0].get_height()
             # blit surfaces
             surface_main.blits(debug_info)
-        # if paused overlay fade
+        # if paused apply overlay
         if pause:
-            # apply pause overlay
             surface_apply_fade()
             surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, TEXT_PAUSE)
             surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)

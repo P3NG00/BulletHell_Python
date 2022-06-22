@@ -7,7 +7,6 @@ from .constants import BULLET_LIFE
 from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
 from .constants import DEBUG_LINE_COLOR
-from .constants import DEBUG_LINE_LENGTH
 from .constants import DEBUG_LINE_WIDTH
 from .constants import ENEMY_COLOR
 from .constants import ENEMY_LIFE
@@ -55,7 +54,7 @@ class GameObject(ABC):
         if self.is_alive():
             draw.circle(self.color, self.pos, self.radius)
             if draw_direction:
-                draw.line(DEBUG_LINE_COLOR, self.pos, self.direction, DEBUG_LINE_LENGTH, DEBUG_LINE_WIDTH)
+                draw.line(DEBUG_LINE_COLOR, self.pos, self.direction, self.radius, DEBUG_LINE_WIDTH)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
