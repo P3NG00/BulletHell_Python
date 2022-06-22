@@ -16,6 +16,8 @@ from data.constants import AIM_LINE_LENGTH
 from data.constants import AIM_LINE_WIDTH
 from data.constants import BULLET_RADIUS
 from data.constants import create_font
+from data.constants import ENEMY_DESPAWN_DISTANCE
+from data.constants import ENEMY_DESPAWN_RATE
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
@@ -157,6 +159,7 @@ input = Vector2(0)
 pause = False
 running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
+current_enemy_despawn_time = ENEMY_DESPAWN_RATE
 # game data
 player = None
 obj_bullet = None
@@ -259,7 +262,7 @@ while running:
 
         # spawn enemies around player
         current_enemy_spawn_time -= 1
-        if current_enemy_spawn_time <= 0:
+        if current_enemy_spawn_time == 0:
             current_enemy_spawn_time = ENEMY_SPAWN_RATE
             spawn_enemy()
         # update player
@@ -290,6 +293,11 @@ while running:
             # test enemy collision
             for enemy_ in obj_enemy:
                 test_collision(enemy, enemy_)
+        # check despawn timer
+        current_enemy_despawn_time -= 1
+        if current_enemy_despawn_time == 0:
+            current_enemy_despawn_time = ENEMY_DESPAWN_RATE
+            obj_enemy = [enemy for enemy in obj_enemy if (player.pos - enemy.pos).magnitude() < ENEMY_DESPAWN_DISTANCE]
         # remove dead game objects
         obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
         enemies = len(obj_enemy)
@@ -324,7 +332,8 @@ while running:
                           f"entity_enemies: {len(obj_enemy)}",
                           f"entity_bullets: {len(obj_bullet)}",
                           f"tiles_drawn: {tiles_drawn}",
-                          f"enemy_spawn_time: {current_enemy_spawn_time}"]
+                          f"enemy_spawn_time: {current_enemy_spawn_time}",
+                          f"enemy_despawn_time: {current_enemy_despawn_time}"]
             current_height = UI_BORDER_OFFSET
             for i in range(len(debug_info)):
                 # replace index with blit information

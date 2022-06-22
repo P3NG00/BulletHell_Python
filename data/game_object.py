@@ -36,7 +36,7 @@ class GameObject(ABC):
 
     def is_alive(self) -> bool:
         """returns if the game object has life remaining"""
-        return self._life > 0.0
+        return self._life > 0
 
     def damage(self, amount: int = 1) -> None:
         """reduces the object's life"""
