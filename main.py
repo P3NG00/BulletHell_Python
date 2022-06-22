@@ -328,6 +328,8 @@ while running:
                           f"frames_per_second: {clock.get_fps():.3f}",
                           f"pos_x: {player.pos.x:.3f}",
                           f"pos_y: {player.pos.y:.3f}",
+                          f"direction_x: {player.direction.x:.3f}",
+                          f"direction_y: {player.direction.y:.3f}",
                           f"entity_enemies: {len(obj_enemy)}",
                           f"entity_bullets: {len(obj_bullet)}",
                           f"tiles_drawn: {tiles_drawn}",
