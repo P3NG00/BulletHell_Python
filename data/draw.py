@@ -60,7 +60,6 @@ class Draw:
         start = start.copy() - self.camera_offset
         end = start + (direction * length)
         if self.anti_aliasing:
-            # pygame.draw.aaline(self.surface, color, start, end)
             center = (start + end) / 2
             half_length = (start - end).length() / 2
             half_thickness = DEBUG_LINE_WIDTH / 2
