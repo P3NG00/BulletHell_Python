@@ -52,7 +52,9 @@ FONT_FILE = "data/upheavtt.ttf"
 AIM_LINE_COLOR = Color(255, 255, 255)
 BULLET_COLOR = Color(0, 128, 255)
 DEBUG_LINE_COLOR = Color(255, 64, 128)
-ENEMY_COLOR = Color(64, 255, 16)
+ENEMY_COLORS = [Color(64, 255, 16),
+                Color(192, 128, 16),
+                Color(255, 32, 0)]
 PAUSE_OVERLAY_COLOR = Color(0, 0, 0, 192)
 PLAYER_COLOR = Color(0, 255, 255)
 

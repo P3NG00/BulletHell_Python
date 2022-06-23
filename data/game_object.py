@@ -8,7 +8,7 @@ from .constants import BULLET_RADIUS
 from .constants import BULLET_SPEED
 from .constants import DEBUG_LINE_COLOR
 from .constants import DEBUG_LINE_WIDTH
-from .constants import ENEMY_COLOR
+from .constants import ENEMY_COLORS
 from .constants import ENEMY_LIFE
 from .constants import ENEMY_RADIUS
 from .constants import ENEMY_SPEED
@@ -110,7 +110,12 @@ class Enemy(GameObject):
     """enemy game object"""
 
     def __init__(self, pos: Vector2):
-        super().__init__(pos, ENEMY_RADIUS, ENEMY_SPEED, ENEMY_COLOR, ENEMY_LIFE)
+        super().__init__(pos, ENEMY_RADIUS, ENEMY_SPEED, ENEMY_COLORS[0], ENEMY_LIFE)
+
+    def damage(self, amount: int = 1) -> None:
+        super().damage(amount)
+        if self.is_alive():
+            self.color = ENEMY_COLORS[ENEMY_LIFE - self._life]
 
     def update(self, player: Player) -> None:
         """moves the enemy towards the player"""
