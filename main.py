@@ -152,7 +152,6 @@ def load_image(file: str, scale: int) -> Surface:
 TILE_SCALE = 96
 HEART_SCALE = 32
 HEART_SPACE_SCALE = HEART_SCALE / 4
-HEART_SPACE_SCALE_HALF = HEART_SPACE_SCALE / 2
 
 TILE = load_image("tile", TILE_SCALE)
 HEART = load_image("heart", HEART_SCALE)
@@ -165,6 +164,7 @@ set_window_title(TITLE)
 draw = Draw(surface_main, TILE)
 clock = Clock()
 input = Vector2(0)
+firing = False
 pause = False
 running = True
 current_enemy_spawn_time = ENEMY_SPAWN_RATE
@@ -242,26 +242,18 @@ while running:
                         input.x -= 1
             case pg.MOUSEBUTTONDOWN:
                 match event.button:
-                    # fire a bullet in the direction of the mouse if bullets are available
+                    # enable firing
                     case 1:
-                        # game not paused, player weapon not on cooldown or reloading, and player is alive
-                        if not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
-                            # update stats
-                            stats["bullets"] -= 1
-                            stats["shots"] += 1
-                            # if last bullet begin reload
-                            if stats["bullets"] == 0:
-                                weapon_reload = WEAPON_RELOAD_FRAMES
-                            # if bullets remain, start cooldown
-                            else:
-                                weapon_cooldown = WEAPON_COOLDOWN_FRAMES
-                            # create new bullet object in front of player
-                            direction = get_mouse_direction()
-                            obj_bullet.append(Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
+                        firing = True
                     # toggle aim line
                     case 3:
                         if not pause:
                             toggle_setting(SHOW_AIM_LINE)
+            case pg.MOUSEBUTTONUP:
+                match event.button:
+                    # disable firing
+                    case 1:
+                        firing = False
         # end of event handling
 
     # check pause
@@ -286,6 +278,21 @@ while running:
                     # reload finished
                     stats["bullets"] = WEAPON_BULLETS
         stats["distance"] += (player.pos - original_pos).length()
+        # fire a bullet in the direction of the mouse if bullets are available
+        # game not paused, player weapon not on cooldown or reloading, and player is alive
+        if firing and not pause and weapon_cooldown == 0 and weapon_reload == 0 and player.is_alive():
+            # update stats
+            stats["bullets"] -= 1
+            stats["shots"] += 1
+            # if last bullet begin reload
+            if stats["bullets"] == 0:
+                weapon_reload = WEAPON_RELOAD_FRAMES
+            # if bullets remain, start cooldown
+            else:
+                weapon_cooldown = WEAPON_COOLDOWN_FRAMES
+            # create new bullet object in front of player
+            direction = get_mouse_direction()
+            obj_bullet.append(Bullet(player.pos + (direction * (PLAYER_RADIUS + BULLET_RADIUS)), direction))
         # update bullets
         for bullet in obj_bullet:
             bullet.update()
@@ -332,8 +339,9 @@ while running:
             start_pos = player.pos + (get_mouse_direction() * (player.radius * 2))
             draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
         # draw health
-        height = SURFACE_SIZE.y - HEART_SIZE.y - (HEART_SPACE_SCALE_HALF)
-        start = SURFACE_CENTER.x - (player._life * (HEART_SIZE.x / 2)) - (HEART_SPACE_SCALE * (player._life / 2))
+        heart_space_scale_half = HEART_SPACE_SCALE / 2
+        height = SURFACE_SIZE.y - HEART_SIZE.y - (heart_space_scale_half)
+        start = SURFACE_CENTER.x - (player._life * (HEART_SIZE.x / 2) + ((player._life - 1) * (heart_space_scale_half)))
         health_info = []
         for i in range(0, player._life):
             health_info.append((HEART, (start, height)))
