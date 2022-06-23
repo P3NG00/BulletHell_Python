@@ -146,22 +146,25 @@ WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # images
-def load_image(file: str, scale: int) -> Surface:
-    return pg.transform.scale(pg.image.load(f"images/{file}.png").convert_alpha(), Vector2(scale))
+def load_image(file: str, scale: Vector2) -> Surface:
+    return pg.transform.scale(pg.image.load(f"images/{file}.png").convert_alpha(), scale)
 
-TILE_SCALE = 96
-HEART_SCALE = 32
-HEART_SPACE_SCALE = HEART_SCALE / 4
+IMAGE_BULLET_SCALE = Vector2(16, 32)
+IMAGE_HEART_SCALE = Vector2(32)
+IMAGE_HEART_SPACE_SCALE = IMAGE_HEART_SCALE / 4
+IMAGE_TILE_SCALE = Vector2(96)
 
-TILE = load_image("tile", TILE_SCALE)
-HEART = load_image("heart", HEART_SCALE)
+IMAGE_BULLET = load_image("bullet", IMAGE_BULLET_SCALE)
+IMAGE_HEART = load_image("heart", IMAGE_HEART_SCALE)
+IMAGE_TILE = load_image("tile", IMAGE_TILE_SCALE)
 
-HEART_SIZE = Vector2(HEART.get_size())
+IMAGE_BULLET_SIZE = Vector2(IMAGE_BULLET.get_size())
+IMAGE_HEART_SIZE = Vector2(IMAGE_HEART.get_size())
 
 # begin main script
 set_window_title(TITLE)
 # program info
-draw = Draw(surface_main, TILE)
+draw = Draw(surface_main, IMAGE_TILE)
 clock = Clock()
 input = Vector2(0)
 firing = False
@@ -336,40 +339,49 @@ while running:
     if player.is_alive():
         # draw aim line if not paused and setting is enabled
         if not pause and settings[SHOW_AIM_LINE]:
-            start_pos = player.pos + (get_mouse_direction() * (player.radius * 2))
-            draw.line(AIM_LINE_COLOR, start_pos, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
+            current = player.pos + (get_mouse_direction() * (player.radius * 2))
+            draw.line(AIM_LINE_COLOR, current, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
         # draw health
-        heart_space_scale_half = HEART_SPACE_SCALE / 2
-        height = SURFACE_SIZE.y - HEART_SIZE.y - (heart_space_scale_half)
-        start = SURFACE_CENTER.x - (player._life * (HEART_SIZE.x / 2) + ((player._life - 1) * (heart_space_scale_half)))
-        health_info = []
+        heart_space_scale_half = IMAGE_HEART_SPACE_SCALE / 2
+        height = SURFACE_SIZE.y - IMAGE_HEART_SIZE.y - UI_BORDER_OFFSET
+        current = SURFACE_CENTER.x - (player._life * (IMAGE_HEART_SIZE.x / 2) + ((player._life - 1) * (heart_space_scale_half.x)))
+        blit_info = []
         for i in range(0, player._life):
-            health_info.append((HEART, (start, height)))
-            start += HEART_SIZE.x + HEART_SPACE_SCALE
-        surface_main.blits(health_info)
+            blit_info.append((IMAGE_HEART, (current, height)))
+            current += IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x
+        surface_main.blits(blit_info)
+        # draw ammo
+        current = SURFACE_SIZE.copy() - Vector2(UI_BORDER_OFFSET)
+        current.y -= IMAGE_BULLET_SIZE.y
+        current.x -= IMAGE_BULLET_SIZE.x * stats["bullets"]
+        blit_info = []
+        for i in range(stats["bullets"]):
+            blit_info.append((IMAGE_BULLET, current.copy()))
+            current.x += IMAGE_BULLET_SIZE.x
+        surface_main.blits(blit_info)
         # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom
-            debug_info = [f"screen_width: {SURFACE_SIZE.x}",
-                          f"screen_height: {SURFACE_SIZE.y}",
-                          f"frames_per_second: {clock.get_fps():.3f}",
-                          f"pos_x: {player.pos.x:.3f}",
-                          f"pos_y: {player.pos.y:.3f}",
-                          f"direction_x: {player.direction.x:.3f}",
-                          f"direction_y: {player.direction.y:.3f}",
-                          f"entity_enemies: {len(obj_enemy)}",
-                          f"entity_bullets: {len(obj_bullet)}",
-                          f"tiles_drawn: {tiles_drawn}",
-                          f"enemy_spawn_time: {current_enemy_spawn_time}",
-                          f"enemy_despawn_time: {current_enemy_despawn_time}"]
+            blit_info = [f"screen_width: {SURFACE_SIZE.x}",
+                         f"screen_height: {SURFACE_SIZE.y}",
+                         f"frames_per_second: {clock.get_fps():.3f}",
+                         f"pos_x: {player.pos.x:.3f}",
+                         f"pos_y: {player.pos.y:.3f}",
+                         f"direction_x: {player.direction.x:.3f}",
+                         f"direction_y: {player.direction.y:.3f}",
+                         f"entity_enemies: {len(obj_enemy)}",
+                         f"entity_bullets: {len(obj_bullet)}",
+                         f"tiles_drawn: {tiles_drawn}",
+                         f"enemy_spawn_time: {current_enemy_spawn_time}",
+                         f"enemy_despawn_time: {current_enemy_despawn_time}"]
             current_height = UI_BORDER_OFFSET
-            for i in range(len(debug_info)):
+            for i in range(len(blit_info)):
                 # replace index with blit information
-                debug_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, debug_info[i]), (UI_BORDER_OFFSET + 5, current_height))
+                blit_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height))
                 # move downwards from last height
-                current_height += debug_info[i][0].get_height()
+                current_height += blit_info[i][0].get_height()
             # blit surfaces
-            surface_main.blits(debug_info)
+            surface_main.blits(blit_info)
         # if paused apply overlay
         if pause:
             surface_apply_fade()
