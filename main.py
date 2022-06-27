@@ -105,9 +105,9 @@ def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
     surface_main.blit(surface_fade, (0, 0))
 
-def spawn_enemy(distance_scale: float = 1.0) -> None:
+def spawn_enemy() -> None:
     """spawns enemy at random position"""
-    obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * distance_scale)))
+    obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * 0.5)))
 
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
@@ -130,14 +130,6 @@ def reset_game() -> None:
              "hits": 0,
              "kills": 0,
              "shots": 0}
-    # spawn enemies shorter than regular spawn distance
-    for i in range(START_ENEMY_AMOUNT):
-        spawn_enemy(START_ENEMY_DISTANCE + (i * START_ENEMY_INCREMENT))
-
-# game values
-START_ENEMY_AMOUNT = 3
-START_ENEMY_DISTANCE = 0.55
-START_ENEMY_INCREMENT = 0.1
 
 # weapon
 WEAPON_BULLETS = 10
@@ -172,7 +164,7 @@ input = Vector2(0)
 firing = False
 pause = False
 running = True
-current_enemy_spawn_time = ENEMY_SPAWN_RATE
+current_enemy_spawn_time = int(ENEMY_SPAWN_RATE / 2)
 current_enemy_despawn_time = ENEMY_DESPAWN_RATE
 # game data
 player = None
