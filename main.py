@@ -306,6 +306,12 @@ while running:
                     bullet.kill()
                     enemy.damage(WEAPON_DAMAGE)
                     stats["hits"] += 1
+        # remove dead game objects
+        obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
+        enemies = len(obj_enemy)
+        obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
+        # increment kill for each dead enemy
+        stats["kills"] += enemies - len(obj_enemy)
         # update enemies
         for enemy in obj_enemy:
             enemy.update(player)
@@ -317,12 +323,6 @@ while running:
         if current_enemy_despawn_time == 0:
             current_enemy_despawn_time = ENEMY_DESPAWN_RATE
             obj_enemy = [enemy for enemy in obj_enemy if (player.pos - enemy.pos).magnitude() < ENEMY_DESPAWN_DISTANCE]
-        # remove dead game objects
-        obj_bullet = [bullet for bullet in obj_bullet if bullet.is_alive()]
-        enemies = len(obj_enemy)
-        obj_enemy = [enemy for enemy in obj_enemy if enemy.is_alive()]
-        # increment kill for each dead enemy
-        stats["kills"] += enemies - len(obj_enemy)
         # update draw object
         draw.update(player.pos, settings[ANTI_ALIASING])
 
