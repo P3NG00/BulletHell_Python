@@ -4,7 +4,6 @@ __pycache__/
 data/__pycache__/
 data/settings.json
 .git/
-.vscode/
 *.stats
 assoc_*.bat
 event_testing.py
