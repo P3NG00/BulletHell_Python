@@ -105,10 +105,6 @@ def surface_apply_fade() -> None:
     """applies fade effect to main surface"""
     surface_main.blit(surface_fade, (0, 0))
 
-def spawn_enemy() -> None:
-    """spawns enemy at random position"""
-    obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * 0.5)))
-
 def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
     return (get_mouse_pos() + draw.camera_offset - player.pos).normalize()
@@ -262,7 +258,7 @@ while running:
         current_enemy_spawn_time -= 1
         if current_enemy_spawn_time == 0:
             current_enemy_spawn_time = ENEMY_SPAWN_RATE
-            spawn_enemy()
+            obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * 0.5)))
         # update player
         original_pos = player.pos.copy()
         if player.is_alive():
