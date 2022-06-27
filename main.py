@@ -161,6 +161,8 @@ IMAGE_TILE = load_image("tile", IMAGE_TILE_SCALE)
 IMAGE_BULLET_SIZE = Vector2(IMAGE_BULLET.get_size())
 IMAGE_HEART_SIZE = Vector2(IMAGE_HEART.get_size())
 
+UI_BULLET_START_POS = SURFACE_SIZE - Vector2(UI_BORDER_OFFSET) - IMAGE_BULLET_SIZE
+
 # begin main script
 set_window_title(TITLE)
 # program info
@@ -345,20 +347,9 @@ while running:
         heart_space_scale_half = IMAGE_HEART_SPACE_SCALE / 2
         height = SURFACE_SIZE.y - IMAGE_HEART_SIZE.y - UI_BORDER_OFFSET
         current = SURFACE_CENTER.x - (player._life * (IMAGE_HEART_SIZE.x / 2) + ((player._life - 1) * (heart_space_scale_half.x)))
-        blit_info = []
-        for i in range(0, player._life):
-            blit_info.append((IMAGE_HEART, (current, height)))
-            current += IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x
-        surface_main.blits(blit_info)
+        surface_main.blits([(IMAGE_HEART, (current + ((IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x) * i), height)) for i in range(0, player._life)])
         # draw ammo
-        current = SURFACE_SIZE.copy() - Vector2(UI_BORDER_OFFSET)
-        current.y -= IMAGE_BULLET_SIZE.y
-        current.x -= IMAGE_BULLET_SIZE.x * stats["bullets"]
-        blit_info = []
-        for i in range(stats["bullets"]):
-            blit_info.append((IMAGE_BULLET, current.copy()))
-            current.x += IMAGE_BULLET_SIZE.x
-        surface_main.blits(blit_info)
+        surface_main.blits([(IMAGE_BULLET, (UI_BULLET_START_POS.x - (IMAGE_BULLET_SIZE.x * i), UI_BULLET_START_POS.y)) for i in range(stats["bullets"])])
         # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom
@@ -375,13 +366,8 @@ while running:
                          f"enemy_spawn_time: {current_enemy_spawn_time}",
                          f"enemy_despawn_time: {current_enemy_despawn_time}"]
             current_height = UI_BORDER_OFFSET
-            for i in range(len(blit_info)):
-                # replace index with blit information
-                blit_info[i] = (create_text_surface(UI_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height))
-                # move downwards from last height
-                current_height += blit_info[i][0].get_height()
             # blit surfaces
-            surface_main.blits(blit_info)
+            surface_main.blits([(create_text_surface(UI_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height + (FONTS[FontType.UI].get_height() * i))) for i in range(len(blit_info))])
         # if paused apply overlay
         if pause:
             surface_apply_fade()
