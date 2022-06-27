@@ -26,6 +26,7 @@ from data.constants import random_vector
 from data.constants import seconds_to_frames
 from data.constants import SURFACE_CENTER
 from data.constants import SURFACE_SIZE
+from data.constants import TEXT_DEBUG
 from data.constants import TEXT_GAME_OVER
 from data.constants import TEXT_PAUSE
 from data.constants import TEXT_RESTART
@@ -86,10 +87,10 @@ FONTS = {FontType.NORMAL: create_font(24),
          FontType.GAMEOVER: create_font(64)}
 
 # font colors
+DEBUG_FONT_COLOR = Color(192, 192, 192)
 GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
-UI_FONT_COLOR = Color(192, 192, 192)
 
 # surfaces
 surface_main = create_window(SURFACE_SIZE)
@@ -247,7 +248,7 @@ while running:
                     # disable firing
                     case 1:
                         firing = False
-        # end of event handling
+    # end of event handling
 
     # check pause
     if not pause:
@@ -341,8 +342,7 @@ while running:
         # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom
-            blit_info = [f"screen_width: {SURFACE_SIZE.x}",
-                         f"screen_height: {SURFACE_SIZE.y}",
+            blit_info = [f"screen_size: {int(SURFACE_SIZE.x)}x{int(SURFACE_SIZE.y)}",
                          f"frames_per_second: {clock.get_fps():.3f}",
                          f"pos_x: {player.pos.x:.3f}",
                          f"pos_y: {player.pos.y:.3f}",
@@ -353,9 +353,10 @@ while running:
                          f"tiles_drawn: {tiles_drawn}",
                          f"enemy_spawn_time: {current_enemy_spawn_time}",
                          f"enemy_despawn_time: {current_enemy_despawn_time}"]
-            current_height = UI_BORDER_OFFSET
             # blit surfaces
-            surface_main.blits([(create_text_surface(UI_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height + (FONTS[FontType.UI].get_height() * i))) for i in range(len(blit_info))])
+            surface_main.blit(create_text_surface(DEBUG_FONT_COLOR, FontType.NORMAL, TEXT_DEBUG), (UI_BORDER_OFFSET + 5, UI_BORDER_OFFSET))
+            current_height = UI_BORDER_OFFSET + FONTS[FontType.NORMAL].get_height()
+            surface_main.blits([(create_text_surface(DEBUG_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height + (FONTS[FontType.UI].get_height() * i))) for i in range(len(blit_info))])
         # if paused apply overlay
         if pause:
             surface_apply_fade()

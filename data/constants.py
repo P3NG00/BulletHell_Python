@@ -35,6 +35,7 @@ FPS = 65.0
 CAMERA_SPEED = make_framerate_independent(3)
 
 # text
+TEXT_DEBUG = "DEBUG INFO:"
 TEXT_GAME_OVER = "GAME OVER"
 TEXT_PAUSE = "Paused"
 TEXT_RESTART = "Press SPACE to restart..."
