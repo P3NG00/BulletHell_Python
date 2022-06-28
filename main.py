@@ -19,7 +19,6 @@ from data.constants import AIM_LINE_LENGTH
 from data.constants import AIM_LINE_WIDTH
 from data.constants import BULLET_RADIUS
 from data.constants import create_font
-from data.constants import ENEMY_DESPAWN_DISTANCE
 from data.constants import ENEMY_DESPAWN_RATE
 from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
@@ -263,7 +262,7 @@ while running:
         current_enemy_spawn_time -= 1
         if current_enemy_spawn_time == 0:
             current_enemy_spawn_time = ENEMY_SPAWN_RATE
-            obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE * 0.5)))
+            obj_enemy.append(Enemy(player.pos + (random_vector() * ENEMY_SPAWN_DISTANCE)))
         # update player
         original_pos = player.pos.copy()
         if player.is_alive():
@@ -317,7 +316,7 @@ while running:
         current_enemy_despawn_time -= 1
         if current_enemy_despawn_time == 0:
             current_enemy_despawn_time = ENEMY_DESPAWN_RATE
-            obj_enemy = [enemy for enemy in obj_enemy if (player.pos - enemy.pos).magnitude() < ENEMY_DESPAWN_DISTANCE]
+            obj_enemy = [enemy for enemy in obj_enemy if (player.pos - enemy.pos).magnitude() < ENEMY_SPAWN_DISTANCE]
         # update draw object
         draw.update(player.pos, settings[ANTI_ALIASING])
 
