@@ -2,7 +2,6 @@ import json
 from enum import Enum
 import pygame as pg
 from pygame import init as init_pygame
-from pygame import RESIZABLE
 from pygame import Surface
 from pygame.color import Color
 from pygame.display import flip as update_window
@@ -98,7 +97,7 @@ PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
 
 # surfaces
-surface_main = create_window(SURFACE_SIZE, RESIZABLE)
+surface_main = create_window(SURFACE_SIZE)
 surface_fade = Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
