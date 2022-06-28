@@ -6,6 +6,5 @@ data/settings.json
 .git/
 *.stats
 assoc_*.bat
-event_testing.py
 IDEA.txt
 log

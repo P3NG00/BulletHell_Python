@@ -1,15 +1,20 @@
-import pygame as pg
 import json
 from enum import Enum
+import pygame as pg
+from pygame import init as init_pygame
+from pygame import RESIZABLE
 from pygame import Surface
 from pygame.color import Color
 from pygame.display import flip as update_window
 from pygame.display import iconify as minimize_window
 from pygame.display import set_caption as set_window_title
 from pygame.display import set_mode as create_window
+from pygame.event import get as get_events
+from pygame.image import load as load_image
 from pygame.math import Vector2
 from pygame.mouse import get_pos as get_mouse_pos
 from pygame.time import Clock
+from pygame.transform import scale as scale_surface
 from data.constants import AIM_LINE_COLOR
 from data.constants import AIM_LINE_LENGTH
 from data.constants import AIM_LINE_WIDTH
@@ -40,7 +45,7 @@ from data.game_object import test_collision
 
 """main game script"""
 
-pg.init()
+init_pygame()
 
 # game settings
 SETTINGS_FILE = "data/settings.json"
@@ -93,7 +98,7 @@ PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
 
 # surfaces
-surface_main = create_window(SURFACE_SIZE)
+surface_main = create_window(SURFACE_SIZE, RESIZABLE)
 surface_fade = Surface(SURFACE_SIZE)
 surface_fade.fill(PAUSE_OVERLAY_COLOR)
 surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
@@ -135,17 +140,17 @@ WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
 # images
-def load_image(file: str, scale: Vector2) -> Surface:
-    return pg.transform.scale(pg.image.load(f"images/{file}.png").convert_alpha(), scale)
+def _load_image(file: str, scale: Vector2) -> Surface:
+    return scale_surface(load_image(f"images/{file}.png").convert_alpha(), scale)
 
 IMAGE_BULLET_SCALE = Vector2(16, 32)
 IMAGE_HEART_SCALE = Vector2(32)
 IMAGE_HEART_SPACE_SCALE = IMAGE_HEART_SCALE / 4
 IMAGE_TILE_SCALE = Vector2(96)
 
-IMAGE_BULLET = load_image("bullet", IMAGE_BULLET_SCALE)
-IMAGE_HEART = load_image("heart", IMAGE_HEART_SCALE)
-IMAGE_TILE = load_image("tile", IMAGE_TILE_SCALE)
+IMAGE_BULLET = _load_image("bullet", IMAGE_BULLET_SCALE)
+IMAGE_HEART = _load_image("heart", IMAGE_HEART_SCALE)
+IMAGE_TILE = _load_image("tile", IMAGE_TILE_SCALE)
 
 IMAGE_BULLET_SIZE = Vector2(IMAGE_BULLET.get_size())
 IMAGE_HEART_SIZE = Vector2(IMAGE_HEART.get_size())
@@ -178,7 +183,7 @@ reset_game()
 while running:
 
     # handle events
-    for event in pg.event.get():
+    for event in get_events():
         match event.type:
             case pg.QUIT:
                 # actions when window is closed
