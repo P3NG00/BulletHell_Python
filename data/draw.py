@@ -1,11 +1,15 @@
-import pygame
 from math import atan2
 from math import cos
 from math import sin
 from pygame import Color
-from pygame import gfxdraw
 from pygame import Surface
 from pygame import Vector2
+from pygame.draw import circle as draw_circle
+from pygame.draw import line as draw_line
+from pygame.gfxdraw import aacircle as draw_aa_circle
+from pygame.gfxdraw import aapolygon as draw_aa_polygon
+from pygame.gfxdraw import filled_circle as draw_filled_circle
+from pygame.gfxdraw import filled_polygon as draw_filled_polygon
 from .constants import CAMERA_SPEED
 from .constants import DEBUG_LINE_WIDTH
 from .constants import SURFACE_CENTER
@@ -32,32 +36,28 @@ class Draw:
         """draws background, returns amount of tiles drawn"""
         # blit background tiles
         start_x = (-self.camera_offset.x % self.tile_size.x) - self.tile_size.x
-        current_pos = Vector2(start_x, (-self.camera_offset.y % self.tile_size.y) - self.tile_size.y)
+        pos = Vector2(start_x, (-self.camera_offset.y % self.tile_size.y) - self.tile_size.y)
         self._blit_info.clear()
-        while current_pos.y < SURFACE_SIZE.y:
-            while current_pos.x < SURFACE_SIZE.x:
-                self._blit_info.append((self.tile, current_pos.copy()))
-                current_pos.x += self.tile_size.x
-            current_pos.x = start_x
-            current_pos.y += self.tile_size.y
+        while pos.y < SURFACE_SIZE.y:
+            while pos.x < SURFACE_SIZE.x:
+                self._blit_info.append((self.tile, pos.copy()))
+                pos.x += self.tile_size.x
+            pos.x = start_x
+            pos.y += self.tile_size.y
         self.surface.blits(self._blit_info)
         return len(self._blit_info)
 
     def circle(self, color: Color, center: Vector2, radius: float) -> None:
         """draws a circle"""
-        # make copy of position and add offset
-        center = center.copy() - self.camera_offset
+        center = center - self.camera_offset
         if self.anti_aliasing:
-            radius, x, y = int(radius), int(center.x), int(center.y)
-            gfxdraw.aacircle(self.surface, x, y, radius, color)
-            gfxdraw.filled_circle(self.surface, x, y, radius, color)
+            self._aa_circle(int(center.x), int(center.y), int(radius), color)
         else:
-            pygame.draw.circle(self.surface, color, center, radius)
+            draw_circle(self.surface, color, center, radius)
 
     def line(self, color: Color, start: Vector2, direction: Vector2, length: float, width: float) -> None:
         """draws a line"""
-        # make copy of position and add offset
-        start = start.copy() - self.camera_offset
+        start = start - self.camera_offset
         end = start + (direction * length)
         if self.anti_aliasing:
             center = (start + end) / 2
@@ -74,7 +74,14 @@ class Draw:
                        center.y - half_thickness * angle_cos - half_length * angle_sin),
                       (center.x + half_length * angle_cos + half_thickness * angle_sin,
                        center.y - half_thickness * angle_cos + half_length * angle_sin))
-            gfxdraw.aapolygon(self.surface, points, color)
-            gfxdraw.filled_polygon(self.surface, points, color)
+            self._aa_polygon(points, color)
         else:
-            pygame.draw.line(self.surface, color, start, end, width)
+            draw_line(self.surface, color, start, end, width)
+
+    def _aa_circle(self, x: int, y: int, radius: int, color: Color) -> None:
+        draw_aa_circle(self.surface, x, y, radius, color)
+        draw_filled_circle(self.surface, x, y, radius, color)
+
+    def _aa_polygon(self, points, color: Color) -> None:
+        draw_aa_polygon(self.surface, points, color)
+        draw_filled_polygon(self.surface, points, color)

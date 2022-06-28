@@ -32,7 +32,8 @@ TITLE = "Python Game"
 FPS = 65.0
 
 # camera
-CAMERA_SPEED = make_framerate_independent(3)
+_RELATIVE_CAMERA_SPEED = 0.2  # [0.0 - 1.0]
+CAMERA_SPEED = make_framerate_independent(FPS * _RELATIVE_CAMERA_SPEED)
 
 # text
 TEXT_DEBUG = "DEBUG INFO:"

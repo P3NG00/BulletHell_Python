@@ -330,13 +330,11 @@ while running:
     if player.is_alive():
         # draw aim line if not paused and setting is enabled
         if not pause and settings[SHOW_AIM_LINE]:
-            current = player.pos + (get_mouse_direction() * (player.radius * 2))
-            draw.line(AIM_LINE_COLOR, current, get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
+            draw.line(AIM_LINE_COLOR, player.pos + (get_mouse_direction() * (player.radius * 2)), get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
         # draw health
-        heart_space_scale_half = IMAGE_HEART_SPACE_SCALE / 2
         height = SURFACE_SIZE.y - IMAGE_HEART_SIZE.y - UI_BORDER_OFFSET
-        current = SURFACE_CENTER.x - (player._life * (IMAGE_HEART_SIZE.x / 2) + ((player._life - 1) * (heart_space_scale_half.x)))
-        surface_main.blits([(IMAGE_HEART, (current + ((IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x) * i), height)) for i in range(0, player._life)])
+        start = SURFACE_CENTER.x - (player._life * (IMAGE_HEART_SIZE.x / 2) + ((player._life - 1) * (IMAGE_HEART_SPACE_SCALE.x / 2)))
+        surface_main.blits([(IMAGE_HEART, (start + ((IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x) * i), height)) for i in range(0, player._life)])
         # draw ammo
         surface_main.blits([(IMAGE_BULLET, (UI_BULLET_START_POS.x - (IMAGE_BULLET_SIZE.x * i), UI_BULLET_START_POS.y)) for i in range(stats["bullets"])])
         # draw debug info
