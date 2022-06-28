@@ -350,11 +350,16 @@ while running:
                          f"pos_y: {player.pos.y:.3f}",
                          f"direction_x: {player.direction.x:.3f}",
                          f"direction_y: {player.direction.y:.3f}",
+                         f"input_x: {input.x}",
+                         f"input_y: {input.y}",
+                         f"firing: {firing}",
                          f"entity_enemies: {len(obj_enemy)}",
                          f"entity_bullets: {len(obj_bullet)}",
                          f"tiles_drawn: {tiles_drawn}",
                          f"enemy_spawn_time: {current_enemy_spawn_time}",
-                         f"enemy_despawn_time: {current_enemy_despawn_time}"]
+                         f"enemy_despawn_time: {current_enemy_despawn_time}",
+                         f"weapon_cooldown: {weapon_cooldown}",
+                         f"weapon_reload: {weapon_reload}"]
             # blit surfaces
             surface_main.blit(create_text_surface(DEBUG_FONT_COLOR, FontType.NORMAL, TEXT_DEBUG), (UI_BORDER_OFFSET + 5, UI_BORDER_OFFSET))
             current_height = UI_BORDER_OFFSET + FONTS[FontType.NORMAL].get_height()

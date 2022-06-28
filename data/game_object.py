@@ -83,7 +83,7 @@ class Player(GameObject):
         if not self.is_vulnerable():
             self.i_frames -= 1
         # normalize input vector
-        self.direction = input
+        self.direction = input.copy()
         if self.direction.length() != 0.0 and not self.direction.is_normalized():
             self.direction = self.direction.normalize()
         # update movement this frame
