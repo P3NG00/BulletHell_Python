@@ -52,7 +52,7 @@ SCREEN_HEIGHT = "screen_height"
 SHOW_AIM_LINE = "show_aim_line"
 SHOW_DEBUG_INFO = "show_debug_info"
 
-DEFAULT_SETTINGS = {ANTI_ALIASING: True,
+DEFAULT_SETTINGS = {ANTI_ALIASING: False,
                     SCREEN_WIDTH: 1024,
                     SCREEN_HEIGHT: 768,
                     SHOW_AIM_LINE: True,
