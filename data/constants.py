@@ -30,7 +30,7 @@ TITLE = "Python Game"
 FPS = 65.0
 
 # camera
-_RELATIVE_CAMERA_SPEED = 0.2  # [0.0 - 1.0]
+_RELATIVE_CAMERA_SPEED = 1.0  # [0.0 - 1.0]
 CAMERA_SPEED = make_framerate_independent(FPS * _RELATIVE_CAMERA_SPEED)
 
 # text
@@ -65,9 +65,9 @@ PLAYER_RADIUS = 16.0
 PLAYER_SPEED = 200.0
 
 # bullet
-BULLET_LIFE = seconds_to_frames(1)
+BULLET_LIFE = seconds_to_frames(0.75)
 BULLET_RADIUS = 8.0
-BULLET_SPEED = 450.0
+BULLET_SPEED = 550.0
 
 # enemy
 ENEMY_LIFE = len(ENEMY_COLORS)
