@@ -150,7 +150,7 @@ def reset_game() -> None:
              "kills": 0,
              "shots": 0}
 
-def update_video_settings(surface_size: Vector2) -> None:
+def update_video_settings(surface_size: Vector2 = Vector2(settings[SCREEN_WIDTH], settings[SCREEN_HEIGHT]), player_offset: Vector2 = Vector2(0)) -> None:
     global SURFACE_SIZE, SURFACE_CENTER, ENEMY_SPAWN_DISTANCE, surface_main, surface_fade, UI_BULLET_START_POS
     settings[SCREEN_WIDTH] = surface_size.x
     settings[SCREEN_HEIGHT] = surface_size.y
@@ -161,11 +161,8 @@ def update_video_settings(surface_size: Vector2) -> None:
     surface_fade = Surface(SURFACE_SIZE)
     surface_fade.fill(PAUSE_OVERLAY_COLOR)
     surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
-    # TODO run and fix error here
     UI_BULLET_START_POS = SURFACE_SIZE - Vector2(UI_BORDER_OFFSET) - IMAGE_BULLET_SIZE
-
-# TODO update to setting loaded from settings
-update_video_settings(Vector2(settings[SCREEN_WIDTH], settings[SCREEN_HEIGHT]))
+    draw.camera_offset = player_offset - SURFACE_CENTER
 
 # weapon
 WEAPON_BULLETS = 10
@@ -192,6 +189,7 @@ weapon_cooldown = None
 weapon_reload = None
 stats = None
 # reset game
+update_video_settings()
 reset_game()
 
 
@@ -270,7 +268,7 @@ while running:
                     case 1:
                         firing = False
             case pg.VIDEORESIZE:
-                update_video_settings(Vector2(event.w, event.h))
+                update_video_settings(Vector2(event.w, event.h), player.pos)
                 pause = True
     # end of event handling
 
