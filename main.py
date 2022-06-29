@@ -59,26 +59,33 @@ DEFAULT_SETTINGS = {ANTI_ALIASING: False,
                     SHOW_DEBUG_INFO: False}
 
 # attempt to load settings from file
+print("Initializing settings...")
 try:
     with open(SETTINGS_FILE) as file:
         settings = json.load(file)
+    print("Settings found!")
     default_copy = DEFAULT_SETTINGS.copy()
     # delete invalid settings
     for setting in settings.copy():
         try:
             del default_copy[setting]
         except KeyError:
+            print(f"Invalid setting: {setting}")
             del settings[setting]
     # add missing settings
     for setting in default_copy:
+        print(f"Missing setting: {setting}")
         settings[setting] = default_copy[setting]
 # error loading file, use default settings
 except:
+    print("Error loading settings. Using defaults...")
     settings = DEFAULT_SETTINGS
+print("Finished initializing settings.")
 
 def toggle_setting(setting: str) -> None:
     """toggles specified setting"""
     settings[setting] = not settings[setting]
+    print(f"Toggled '{setting}' to {settings[setting]}")
 
 # fonts
 class FontType(Enum):
@@ -149,6 +156,7 @@ def reset_game() -> None:
              "hits": 0,
              "kills": 0,
              "shots": 0}
+    print("Game reset.")
 
 def update_video_settings(surface_size: Vector2 = Vector2(settings[SCREEN_WIDTH], settings[SCREEN_HEIGHT]), player_offset: Vector2 = Vector2(0)) -> None:
     global SURFACE_SIZE, SURFACE_CENTER, ENEMY_SPAWN_DISTANCE, surface_main, surface_fade, UI_BULLET_START_POS
@@ -163,6 +171,7 @@ def update_video_settings(surface_size: Vector2 = Vector2(settings[SCREEN_WIDTH]
     surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
     UI_BULLET_START_POS = SURFACE_SIZE - Vector2(UI_BORDER_OFFSET) - IMAGE_BULLET_SIZE
     draw.camera_offset = player_offset - SURFACE_CENTER
+    print(f"Resized to {surface_size.x}x{surface_size.y}")
 
 # weapon
 WEAPON_BULLETS = 10
@@ -191,6 +200,7 @@ stats = None
 # reset game
 update_video_settings()
 reset_game()
+print("Beginning game loop.")
 
 
 # loop
@@ -406,6 +416,7 @@ while running:
     # end of game loop
 
 # save settings
+print("Saving settings...")
 with open(SETTINGS_FILE, "w") as file:
     json.dump(settings, file, indent=2)
 # close pygame
