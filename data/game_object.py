@@ -1,4 +1,5 @@
 from pygame import Color
+from pygame import Surface
 from pygame.math import Vector2
 from abc import ABC
 from abc import abstractmethod
@@ -49,12 +50,12 @@ class GameObject(ABC):
         """moves the game object with its direction"""
         self.pos += make_framerate_independent(self.direction * self.speed)
 
-    def draw(self, draw: Draw, draw_direction: bool) -> None:
+    def draw(self, surface: Surface, draw: Draw, draw_direction: bool) -> None:
         """draws the object to the surface"""
         if self.is_alive():
-            draw.circle(self.color, self.pos, self.radius)
+            draw.circle(surface, self.color, self.pos, self.radius)
             if draw_direction:
-                draw.line(DEBUG_LINE_COLOR, self.pos, self.direction, self.radius, DEBUG_LINE_WIDTH)
+                draw.line(surface, DEBUG_LINE_COLOR, self.pos, self.direction, self.radius, DEBUG_LINE_WIDTH)
 
     def is_touching(self, other: 'GameObject') -> bool:
         """returns if this gameobject is touching the other gameobject"""
@@ -89,10 +90,10 @@ class Player(GameObject):
         # update movement this frame
         super().update()
 
-    def draw(self, draw: Draw, draw_direction: bool) -> None:
+    def draw(self, surface: Surface, draw: Draw, draw_direction: bool) -> None:
         """draws the player. if damaged, draw every other frame"""
         if self.i_frames % 2 == 0:
-            super().draw(draw, draw_direction)
+            super().draw(surface, draw, draw_direction)
 
 class Bullet(GameObject):
     """bullet game object"""

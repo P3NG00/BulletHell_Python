@@ -26,8 +26,6 @@ def create_font(size: int) -> Font:
     return Font(FONT_FILE, size)
 
 # window properties
-SURFACE_SIZE = Vector2(1280, 720)
-SURFACE_CENTER = SURFACE_SIZE / 2
 TITLE = "Python Game"
 FPS = 65.0
 
@@ -74,7 +72,6 @@ BULLET_SPEED = 450.0
 # enemy
 ENEMY_LIFE = len(ENEMY_COLORS)
 ENEMY_RADIUS = 24.0
-ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude() * 0.5
 ENEMY_DESPAWN_RATE = seconds_to_frames(15)
 ENEMY_SPAWN_RATE = seconds_to_frames(1.25)
 ENEMY_SPEED = 150.0

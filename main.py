@@ -2,6 +2,7 @@ import json
 from enum import Enum
 import pygame as pg
 from pygame import init as init_pygame
+from pygame import RESIZABLE
 from pygame import Surface
 from pygame.color import Color
 from pygame.display import flip as update_window
@@ -20,15 +21,12 @@ from data.constants import AIM_LINE_WIDTH
 from data.constants import BULLET_RADIUS
 from data.constants import create_font
 from data.constants import ENEMY_DESPAWN_RATE
-from data.constants import ENEMY_SPAWN_DISTANCE
 from data.constants import ENEMY_SPAWN_RATE
 from data.constants import FPS
 from data.constants import PAUSE_OVERLAY_COLOR
 from data.constants import PLAYER_RADIUS
 from data.constants import random_vector
 from data.constants import seconds_to_frames
-from data.constants import SURFACE_CENTER
-from data.constants import SURFACE_SIZE
 from data.constants import TEXT_DEBUG
 from data.constants import TEXT_GAME_OVER
 from data.constants import TEXT_PAUSE
@@ -49,10 +47,14 @@ init_pygame()
 SETTINGS_FILE = "data/settings.json"
 
 ANTI_ALIASING = "anti_aliasing"
+SCREEN_WIDTH = "screen_width"
+SCREEN_HEIGHT = "screen_height"
 SHOW_AIM_LINE = "show_aim_line"
 SHOW_DEBUG_INFO = "show_debug_info"
 
 DEFAULT_SETTINGS = {ANTI_ALIASING: True,
+                    SCREEN_WIDTH: 1024,
+                    SCREEN_HEIGHT: 768,
                     SHOW_AIM_LINE: True,
                     SHOW_DEBUG_INFO: False}
 
@@ -95,12 +97,29 @@ GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
 RESTART_FONT_COLOR = Color(128, 128, 128)
 
-# surfaces
-surface_main = create_window(SURFACE_SIZE)
-surface_fade = Surface(SURFACE_SIZE)
-surface_fade.fill(PAUSE_OVERLAY_COLOR)
-surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
+# video settings
+UI_BULLET_START_POS = None
 
+# create window for images to be loaded
+create_window(Vector2(settings[SCREEN_WIDTH], settings[SCREEN_HEIGHT]), RESIZABLE)
+
+# images
+def _load_image(file: str, scale: Vector2) -> Surface:
+    return scale_surface(load_image(f"images/{file}.png").convert_alpha(), scale)
+
+IMAGE_BULLET_SCALE = Vector2(16, 32)
+IMAGE_HEART_SCALE = Vector2(32)
+IMAGE_HEART_SPACE_SCALE = IMAGE_HEART_SCALE / 4
+IMAGE_TILE_SCALE = Vector2(96)
+
+IMAGE_BULLET = _load_image("bullet", IMAGE_BULLET_SCALE)
+IMAGE_HEART = _load_image("heart", IMAGE_HEART_SCALE)
+IMAGE_TILE = _load_image("tile", IMAGE_TILE_SCALE)
+
+IMAGE_BULLET_SIZE = Vector2(IMAGE_BULLET.get_size())
+IMAGE_HEART_SIZE = Vector2(IMAGE_HEART.get_size())
+
+# functions
 def create_text_surface(color: Color, font_type: FontType, text: str) -> Surface:
     """returns a surface with colored text"""
     return FONTS[font_type].render(text, settings[ANTI_ALIASING], color)
@@ -131,34 +150,33 @@ def reset_game() -> None:
              "kills": 0,
              "shots": 0}
 
+def update_video_settings(surface_size: Vector2) -> None:
+    global SURFACE_SIZE, SURFACE_CENTER, ENEMY_SPAWN_DISTANCE, surface_main, surface_fade, UI_BULLET_START_POS
+    settings[SCREEN_WIDTH] = surface_size.x
+    settings[SCREEN_HEIGHT] = surface_size.y
+    SURFACE_SIZE = surface_size
+    SURFACE_CENTER = SURFACE_SIZE / 2
+    ENEMY_SPAWN_DISTANCE = SURFACE_SIZE.magnitude() * 0.55
+    surface_main = create_window(SURFACE_SIZE, RESIZABLE)
+    surface_fade = Surface(SURFACE_SIZE)
+    surface_fade.fill(PAUSE_OVERLAY_COLOR)
+    surface_fade.set_alpha(PAUSE_OVERLAY_COLOR.a)
+    # TODO run and fix error here
+    UI_BULLET_START_POS = SURFACE_SIZE - Vector2(UI_BORDER_OFFSET) - IMAGE_BULLET_SIZE
+
+# TODO update to setting loaded from settings
+update_video_settings(Vector2(settings[SCREEN_WIDTH], settings[SCREEN_HEIGHT]))
+
 # weapon
 WEAPON_BULLETS = 10
 WEAPON_COOLDOWN_FRAMES = seconds_to_frames(0.2)
 WEAPON_DAMAGE = 1
 WEAPON_RELOAD_FRAMES = seconds_to_frames(1)
 
-# images
-def _load_image(file: str, scale: Vector2) -> Surface:
-    return scale_surface(load_image(f"images/{file}.png").convert_alpha(), scale)
-
-IMAGE_BULLET_SCALE = Vector2(16, 32)
-IMAGE_HEART_SCALE = Vector2(32)
-IMAGE_HEART_SPACE_SCALE = IMAGE_HEART_SCALE / 4
-IMAGE_TILE_SCALE = Vector2(96)
-
-IMAGE_BULLET = _load_image("bullet", IMAGE_BULLET_SCALE)
-IMAGE_HEART = _load_image("heart", IMAGE_HEART_SCALE)
-IMAGE_TILE = _load_image("tile", IMAGE_TILE_SCALE)
-
-IMAGE_BULLET_SIZE = Vector2(IMAGE_BULLET.get_size())
-IMAGE_HEART_SIZE = Vector2(IMAGE_HEART.get_size())
-
-UI_BULLET_START_POS = SURFACE_SIZE - Vector2(UI_BORDER_OFFSET) - IMAGE_BULLET_SIZE
-
 # begin main script
 set_window_title(TITLE)
 # program info
-draw = Draw(surface_main, IMAGE_TILE)
+draw = Draw()
 clock = Clock()
 input = Vector2(0)
 firing = False
@@ -251,6 +269,9 @@ while running:
                     # disable firing
                     case 1:
                         firing = False
+            case pg.VIDEORESIZE:
+                update_video_settings(Vector2(event.w, event.h))
+                pause = True
     # end of event handling
 
     # check pause
@@ -318,22 +339,22 @@ while running:
             current_enemy_despawn_time = ENEMY_DESPAWN_RATE
             obj_enemy = [enemy for enemy in obj_enemy if (player.pos - enemy.pos).magnitude() < ENEMY_SPAWN_DISTANCE]
         # update draw object
-        draw.update(player.pos, settings[ANTI_ALIASING])
+        draw.update(surface_main, player.pos, settings[ANTI_ALIASING])
 
     # Render
 
     # draw background
-    tiles_drawn = draw.background()
+    tiles_drawn = draw.background(surface_main, IMAGE_TILE)
     # draw game objects
-    player.draw(draw, settings[SHOW_DEBUG_INFO])
+    player.draw(surface_main, draw, settings[SHOW_DEBUG_INFO])
     for obj_list in [obj_enemy, obj_bullet]:
         for obj in obj_list:
-            obj.draw(draw, settings[SHOW_DEBUG_INFO])
+            obj.draw(surface_main, draw, settings[SHOW_DEBUG_INFO])
     # display appropriate ui
     if player.is_alive():
         # draw aim line if not paused and setting is enabled
         if not pause and settings[SHOW_AIM_LINE]:
-            draw.line(AIM_LINE_COLOR, player.pos + (get_mouse_direction() * (player.radius * 2)), get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
+            draw.line(surface_main, AIM_LINE_COLOR, player.pos + (get_mouse_direction() * (player.radius * 2)), get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
         # draw health
         height = SURFACE_SIZE.y - IMAGE_HEART_SIZE.y - UI_BORDER_OFFSET
         start = SURFACE_CENTER.x - (player._life * (IMAGE_HEART_SIZE.x / 2) + ((player._life - 1) * (IMAGE_HEART_SPACE_SCALE.x / 2)))
