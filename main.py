@@ -350,7 +350,7 @@ while running:
             obj.draw(surface_main, draw, settings[SHOW_DEBUG_INFO])
     # display appropriate ui
     if player.is_alive():
-        # draw aim line if not paused and setting is enabled
+        # draw aim line
         if not pause and settings[SHOW_AIM_LINE]:
             draw.line(surface_main, AIM_LINE_COLOR, player.pos + (get_mouse_direction() * (player.radius * 2)), get_mouse_direction(), AIM_LINE_LENGTH, AIM_LINE_WIDTH)
         # draw health
@@ -362,27 +362,28 @@ while running:
         # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom
-            blit_info = [f"screen_size: {int(SURFACE_SIZE.x)}x{int(SURFACE_SIZE.y)}",
-                         f"frames_per_second: {clock.get_fps():.3f}",
-                         f"pos_x: {player.pos.x:.3f}",
-                         f"pos_y: {player.pos.y:.3f}",
-                         f"direction_x: {player.direction.x:.3f}",
-                         f"direction_y: {player.direction.y:.3f}",
-                         f"input_x: {input.x}",
-                         f"input_y: {input.y}",
-                         f"firing: {firing}",
-                         f"entity_enemies: {len(obj_enemy)}",
-                         f"entity_bullets: {len(obj_bullet)}",
-                         f"tiles_drawn: {tiles_drawn}",
-                         f"enemy_spawn_time: {current_enemy_spawn_time}",
-                         f"enemy_despawn_time: {current_enemy_despawn_time}",
-                         f"weapon_cooldown: {weapon_cooldown}",
-                         f"weapon_reload: {weapon_reload}"]
+            debug_info = [f"screen_size: {int(SURFACE_SIZE.x)}x{int(SURFACE_SIZE.y)}",
+                          f"frames_per_second: {clock.get_fps():.3f}",
+                          f"pos_x: {player.pos.x:.3f}",
+                          f"pos_y: {player.pos.y:.3f}",
+                          f"direction_x: {player.direction.x:.3f}",
+                          f"direction_y: {player.direction.y:.3f}",
+                          f"input_x: {input.x}",
+                          f"input_y: {input.y}",
+                          f"firing: {firing}",
+                          f"entity_enemies: {len(obj_enemy)}",
+                          f"entity_bullets: {len(obj_bullet)}",
+                          f"tiles_drawn: {tiles_drawn}",
+                          f"enemy_spawn_time: {current_enemy_spawn_time}",
+                          f"enemy_despawn_time: {current_enemy_despawn_time}",
+                          f"weapon_cooldown: {weapon_cooldown}",
+                          f"weapon_reload: {weapon_reload}",
+                          f"camera_offset_distance: {player.pos.distance_to(draw.camera_offset + SURFACE_CENTER):.3f}"]
             # blit surfaces
             surface_main.blit(create_text_surface(DEBUG_FONT_COLOR, FontType.NORMAL, TEXT_DEBUG), (UI_BORDER_OFFSET + 5, UI_BORDER_OFFSET))
             current_height = UI_BORDER_OFFSET + FONTS[FontType.NORMAL].get_height()
-            surface_main.blits([(create_text_surface(DEBUG_FONT_COLOR, FontType.UI, blit_info[i]), (UI_BORDER_OFFSET + 5, current_height + (FONTS[FontType.UI].get_height() * i))) for i in range(len(blit_info))])
-        # if paused apply overlay
+            surface_main.blits([(create_text_surface(DEBUG_FONT_COLOR, FontType.UI, debug_info[i]), (UI_BORDER_OFFSET + 5, current_height + (FONTS[FontType.UI].get_height() * i))) for i in range(len(debug_info))])
+        # apply pause overlay
         if pause:
             surface_apply_fade()
             surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, TEXT_PAUSE)
