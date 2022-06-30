@@ -30,7 +30,7 @@ class Draw:
 
     def background(self, surface: Surface, tile: Surface) -> int:
         """draws background, returns amount of tiles drawn"""
-        start_x = int(-self.camera_offset.x % tile.get_width()) - tile.get_height()
+        start_x = int(-self.camera_offset.x % tile.get_width()) - tile.get_width()
         pos = Vector2(start_x, int(-self.camera_offset.y % tile.get_height()) - tile.get_height())
         self._blit_info.clear()
         while pos.y < surface.get_height():
@@ -52,8 +52,7 @@ class Draw:
 
     def line(self, surface: Surface, color: Color, start: Vector2, direction: Vector2, length: float, width: float) -> None:
         """draws a line"""
-        start = start - self.camera_offset
-        self.line_no_offset(surface, color, start, direction, length, width)
+        self.line_no_offset(surface, color, start - self.camera_offset, direction, length, width)
 
     def line_no_offset(self, surface: Surface, color: Color, start: Vector2, direction: Vector2, length: float, width: float) -> None:
         """draws a line without using camera offset"""
