@@ -33,6 +33,9 @@ from data.constants import TEXT_PAUSE
 from data.constants import TEXT_RESTART
 from data.constants import TITLE
 from data.constants import UI_BORDER_OFFSET
+from data.constants import UI_WEAPON_WIDTH
+from data.constants import WEAPON_COOLDOWN_COLOR
+from data.constants import WEAPON_RELOAD_COLOR
 from data.draw import Draw
 from data.game_object import Bullet
 from data.game_object import Enemy
@@ -139,6 +142,13 @@ def get_mouse_direction() -> Vector2:
     """returns a normalized vector2 in the direction of the mouse from the player"""
     return (get_mouse_pos() + draw.camera_offset - player.pos).normalize()
 
+def draw_weapon_bar(color: Color, weapon_current: int, weapon_max: int) -> None:
+    """draws a colored bar representing weapon info"""
+    start = Vector2(SURFACE_CENTER.x, UI_BORDER_OFFSET)
+    length = (weapon_current / weapon_max) * (SURFACE_SIZE.x * 0.2)
+    start.x -= length / 2
+    draw.line_no_offset(surface_main, color, start, Vector2(1, 0), length, UI_WEAPON_WIDTH)
+
 def reset_game() -> None:
     """resets game data"""
     global player, obj_bullet, obj_enemy, weapon_cooldown, weapon_reload, stats
@@ -191,7 +201,7 @@ running = True
 current_enemy_spawn_time = int(ENEMY_SPAWN_RATE / 2)
 current_enemy_despawn_time = ENEMY_DESPAWN_RATE
 # game data
-player = None
+player: Player = None
 obj_bullet = None
 obj_enemy = None
 weapon_cooldown = None
@@ -369,6 +379,11 @@ while running:
         surface_main.blits([(IMAGE_HEART, (start + ((IMAGE_HEART_SIZE.x + IMAGE_HEART_SPACE_SCALE.x) * i), height)) for i in range(0, player._life)])
         # draw ammo
         surface_main.blits([(IMAGE_BULLET, (UI_BULLET_START_POS.x - (IMAGE_BULLET_SIZE.x * i), UI_BULLET_START_POS.y)) for i in range(stats["bullets"])])
+        # draw weapon cooldown
+        if weapon_cooldown != 0:
+            draw_weapon_bar(WEAPON_COOLDOWN_COLOR, weapon_cooldown, WEAPON_COOLDOWN_FRAMES)
+        elif weapon_reload != 0:
+            draw_weapon_bar(WEAPON_RELOAD_COLOR, weapon_reload, WEAPON_RELOAD_FRAMES)
         # draw debug info
         if settings[SHOW_DEBUG_INFO]:
             # these are printed top to bottom

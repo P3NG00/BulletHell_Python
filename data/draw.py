@@ -53,6 +53,10 @@ class Draw:
     def line(self, surface: Surface, color: Color, start: Vector2, direction: Vector2, length: float, width: float) -> None:
         """draws a line"""
         start = start - self.camera_offset
+        self.line_no_offset(surface, color, start, direction, length, width)
+
+    def line_no_offset(self, surface: Surface, color: Color, start: Vector2, direction: Vector2, length: float, width: float) -> None:
+        """draws a line without using camera offset"""
         end = start + (direction * length)
         if self.anti_aliasing:
             center = (start + end) / 2
