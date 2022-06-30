@@ -31,7 +31,7 @@ class Draw:
     def background(self, surface: Surface, tile: Surface) -> int:
         """draws background, returns amount of tiles drawn"""
         start_x = int(-self.camera_offset.x % tile.get_width()) - tile.get_width()
-        pos = Vector2(start_x, int(-self.camera_offset.y % tile.get_height()) - tile.get_height())
+        pos = Vector2(start_x, int(-self.camera_offset.y % tile.get_height() - tile.get_height()))
         self._blit_info.clear()
         while pos.y < surface.get_height():
             while pos.x < surface.get_width():
