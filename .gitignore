@@ -8,3 +8,4 @@ data/settings.json
 assoc_*.bat
 IDEA.txt
 log
+.venv/
