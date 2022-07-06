@@ -73,11 +73,11 @@ try:
         try:
             del default_copy[setting]
         except KeyError:
-            print(f"Invalid setting: {setting}")
+            print(f"Invalid setting: '{setting}'")
             del settings[setting]
     # add missing settings
     for setting in default_copy:
-        print(f"Missing setting: {setting}")
+        print(f"Missing setting: '{setting}'")
         settings[setting] = default_copy[setting]
 # error loading file, use default settings
 except:
@@ -447,4 +447,5 @@ with open(SETTINGS_FILE, "w") as file:
     json.dump(settings, file, indent=2)
 # close pygame
 pg.quit()
+print("Script ended successfully!")
 # end of program
