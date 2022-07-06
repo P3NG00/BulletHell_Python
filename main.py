@@ -105,7 +105,8 @@ FONTS = {FontType.NORMAL: create_font(24),
 DEBUG_FONT_COLOR = Color(192, 192, 192)
 GAMEOVER_FONT_COLOR = Color(255, 0, 0)
 PAUSE_FONT_COLOR = Color(255, 255, 255)
-RESTART_FONT_COLOR = Color(128, 128, 128)
+RESTART_FONT_COLOR = Color(255, 255, 255)
+STATS_FONT_COLOR = Color(128, 128, 128)
 
 # video settings
 UI_BULLET_START_POS = None
@@ -414,12 +415,22 @@ while running:
             surface_text_pause = create_text_surface(PAUSE_FONT_COLOR, FontType.NORMAL, TEXT_PAUSE)
             surface_main.blit(surface_text_pause, (SURFACE_SIZE - surface_text_pause.get_size()) / 2)
     else:
-        # apply game over and restart text
+        # apply game over, stats, and restart text
         surface_apply_fade()
         center = SURFACE_CENTER.copy()
         surface_text_gameover = create_text_surface(GAMEOVER_FONT_COLOR, FontType.GAMEOVER, TEXT_GAME_OVER)
+        try:
+            accuracy = (stats["hits"] / stats["shots"]) * 100
+        except:
+            accuracy = 0
+        surface_text_stat_accuracy = create_text_surface(STATS_FONT_COLOR, FontType.UI, f"Accuracy: {accuracy:.3f}")
+        surface_text_stat_kills = create_text_surface(STATS_FONT_COLOR, FontType.UI, f"Kills: " + str(stats["kills"]))
         surface_text_restart = create_text_surface(RESTART_FONT_COLOR, FontType.NORMAL, TEXT_RESTART)
-        surface_main.blit(surface_text_gameover, center - Vector2(surface_text_gameover.get_size()) / 2)
+        surface_main.blit(surface_text_gameover, center - (Vector2(surface_text_gameover.get_size()) / 2))
+        center.y += surface_text_gameover.get_height()
+        surface_main.blit(surface_text_stat_accuracy, center - (Vector2(surface_text_stat_accuracy.get_size()) / 2))
+        center.y += surface_text_stat_accuracy.get_height()
+        surface_main.blit(surface_text_stat_kills, center - (Vector2(surface_text_stat_kills.get_size()) / 2))
         center.y += surface_text_gameover.get_height()
         surface_main.blit(surface_text_restart, center - Vector2(surface_text_restart.get_size()) / 2)
     # end of game update
