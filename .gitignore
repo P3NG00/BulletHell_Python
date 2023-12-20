@@ -1,9 +1,8 @@
-# DONT IGNORE .GITIGNORE FILE
-
 __pycache__/
 data/__pycache__/
 data/settings.json
 .git/
+.idea/
 *.stats
 assoc_*.bat
 IDEA.txt
